@@ -1,0 +1,65 @@
+body {
+    font-family: 'Brush Script MT', cursive;
+    width: 300px;
+    height: 200px;
+    margin: 0 auto;  
+    font-weight: 400;
+}
+
+.header {
+    background: #0dd6bb;
+    color: white;
+    padding: 10px;
+    display: flex;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.container {
+    padding: 15px;
+    padding-top: 0px;
+    margin-bottom: 2px;
+    text-align: center;
+}
+
+h3 {
+    margin: 3px;
+    padding: 4px;
+}
+
+p {
+    font-size: 14px;
+    margin: 9px;
+}
+
+
+button {
+    background: #0dd6bb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    display: inline-block;
+    font-size: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-inline: 1px;
+    margin-bottom: 10px;
+}
+
+.language-button {
+    border-color: #0dd6bb;
+    border-width: 2px;
+    border-style: solid;
+    background: white;
+    color: black;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.language-button:hover {
+    background: #0dd6bb;
+}
