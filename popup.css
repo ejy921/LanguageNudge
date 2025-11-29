@@ -1,9 +1,18 @@
 body {
     font-family: 'Brush Script MT', cursive;
     width: 300px;
-    height: 200px;
     margin: 0 auto;  
     font-weight: 400;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.settings,
+.welcome-page,
+.nudge-flashcard,
+.nudge-quiz {
+  display: none;  
 }
 
 .header {
@@ -16,16 +25,20 @@ body {
     margin: 0;
 }
 
-.container {
+.welcome-page {
     padding: 15px;
     padding-top: 0px;
     margin-bottom: 2px;
-    text-align: center;
 }
 
 h3 {
     margin: 3px;
     padding: 4px;
+}
+
+h4 {
+    margin: 6px;
+    padding: 3px;
 }
 
 p {
@@ -48,18 +61,204 @@ button {
     margin-bottom: 10px;
 }
 
-.language-button {
+.sub-button {
     border-color: #0dd6bb;
     border-width: 2px;
     border-style: solid;
     background: white;
     color: black;
     padding: 5px 10px;
-    border-radius: 20px;
+    border-radius: 10px;
     font-size: 12px;
     margin-bottom: 5px;
 }
 
-.language-button:hover {
+.sub-button:hover {
     background: #0dd6bb;
+    color: white;
+}
+
+.icon {
+    width: 23px; 
+    height: 23px; 
+    margin-inline: 1px;
+}
+
+.style-option {
+    display: inline-block;
+    margin-inline: 5px;
+}
+
+.style-box {
+    width: 120px;
+    height: 80px;
+    border-color: #cfcfcf;
+    border-width: 2px;
+    border-radius: 5px;
+    border-style: solid;
+    cursor: pointer;
+}
+.style-box:hover {
+    background: #ebebeb;
+}
+
+.example-img {
+    width: 100px;
+    height: 55px;
+    margin-top: 12px;
+}
+
+.container-box {
+    border: #cfcfcf;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 8px;
+    text-align: left;
+}
+
+.settings-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-inline: 5px;
+    padding-block: 5px;
+}
+
+.settings-text {
+    font-size: 12px;
+    margin-block: 1px;
+    margin-inline: 3px;
+}
+
+.container-box p,
+.container-box button {
+  font-size: 12px;
+  padding: 7px;
+  padding-inline: 7px;
+  margin: 3px;
+}
+
+.vocab-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+.vocab-row p {
+    padding: 0;
+}
+
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 17px;
+    border-radius: 34px;
+    margin-top: 2px;
+}
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 15px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 1.5px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #0dd6bb;
+}
+
+input:checked + .slider:before {
+    transform: translateX(12px);
+}
+
+.tabs {
+    overflow: hidden;
+    width: 100%;
+    margin: 5px;
+    margin-inline: 15px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+}
+
+.tabs li {
+    float: left;
+    margin: 0 4.5em 0 0;
+    width: 20px;
+    height: 20px;
+}
+
+.tabs a {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #0dd6bb;
+    padding: .2em 2em;
+    float: left;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    border-radius: 5px 0 0 0;
+    box-shadow: 0 2px 2px rgba(0,0,0,0.4);
+}
+
+.tabs a:hover, 
+.tabs a:hover::after,
+.tabs a:focus,
+.tabs a:focus::after {
+    background: #fff;
+    color: #0dd6bb;
+}
+
+.tabs a:focus {
+    outline: 0;
+}
+
+.tabs a::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: -.5em;
+    bottom: 0;
+    width: 1em;
+    background: #0dd6bb;
+    box-shadow: 2px 2px 2px rgba(0,0,0,0.4);
+    border-radius: 0 5px 0 0;
+    transform: skew(10deg);
 }

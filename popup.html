@@ -3,28 +3,111 @@
   <head>
     <title>LangNudge</title>
     <link href="popup.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="popup.js"></script>
   </head>  
   <body>
+
     <div class="header">LangNudge
-        <img src="images/icons/settings.png" alt="settings" style="width:23px; height:23px; position:absolute; right:10px; top:10px;">
+        <img class="icon" src="images/icons/home.png" alt="home" style="position: absolute; right: 10px; top: 10px;">
+        <img class="icon" src="images/icons/settings.png" alt="settings" style="position: absolute; right: 40px; top: 10px;">
     </div>
-    <div class="container">
+
+    <div class="welcome-page">
         <h2>Welcome to LangNudge!</h2>
         <p>Upload your vocab file:</p>
         <button>Upload
-            <img src="images/icons/upload.png" alt="upload" style="width:15px; height:15px; margin-left:5px; position:relative; top:2px;">
+            <img class="icon" src="images/icons/upload.png" alt="upload">
         </button>
-        <p>Don't have a vocab file?</p>
-        <p>We have some predefined lists of a few languages for you!</p>
-        <button class="language-button">Chinese</button>
-        <button class="language-button">Spanish</button>
-        <button class="language-button">French</button>
-        <button class="language-button">German</button>
-        <button class="language-button">Portuguese</button>
-        <button class="language-button">Japanese</button>
+        <p>Or try one of our curated selections!</p>
+        <button class="sub-button">Chinese</button>
+        <button class="sub-button">Spanish</button>
+        <button class="sub-button">French</button>
+        <button class="sub-button">German</button>
+        <button class="sub-button">Portuguese</button>
+        <button class="sub-button">Japanese</button>
     </div>
+
+    <div class="home">
+        <h3 style="padding-left: 10px;">Your decks</h3>
+        <div class="container-box">
+            <div class="deck-row" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+                <p>Chinese</p>
+                <button>View deck</button>
+                <button>Review</button>
+                <button>Quiz</button>
+            </div>
+        </div>
+        <div class="container-box" style="display: flex; flex-direction: row;border-style: dashed; justify-content: center; align-items: center;">
+            <img class="icon" src="images/icons/add.png" alt="add" style="width: 20px; height: 20px;">
+            <button>Upload</button>
+        </div>
+    </div>
+
+    <div class="vocabs"> 
+        <ul class="tabs">
+            <li><a class="tab1">Lang1</a></li>
+            <li><a class="tab2">Lang2</a></li>
+            <li><a class="tab3">Lang3</a></li>
+        </ul>
+        <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin: 10px;">
+            <input type="text" placeholder="Search vocab..." style="margin-right: 0px; border-radius: 10px; border-color: lightgrey; padding: 0; padding-inline: 8px; width: 55%; height: 20px; font-size: 10px;">
+            <p style="font-size: 13px; margin: 0; padding: 0;">Sort by</p>
+            <img class="icon" src="images/icons/add.png" alt="add" style="width: 15px; height: 15px;">
+            <img class="icon" src="images/icons/delete.png" alt="delete" style="width: 15px; height: 15px;">
+        </div>
+        <div class="container-box" style="border-width: 1px; border-color:lightgray; padding: 0;">
+            <div class="vocab-row">
+                <p>il bagno</p>
+                <p>the bathroom</p>
+            </div>
+            <div class="vocab-row">
+                <p>la cucina</p>
+                <p>the kitchen</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="nudge-flashcard">
+        <h1>il bagno</h1>
+        <button>Flip</button>
+    </div>
+
+    <div class="nudge-quiz">
+        <h1>il bagno</h1>
+        <button class="sub-button">the bathroom</button>
+        <button class="sub-button">the kitchen</button>
+        <button class="sub-button">the bedroom</button>
+    </div>
+
+    <div class="settings">
+        <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 10px;">
+            <div class="style-option">
+                <h4>Flashcard</h4>
+                <div class="style-box">
+                    <img class="example-img" src="images/flashcard.png" alt="flashcard">
+                </div>
+            </div>
+            <div class="style-option">
+                <h4>Quiz</h4>
+                <div class="style-box">
+                    <img class="example-img" src="images/quiz.png" alt="quiz">
+                </div>
+            </div>
+        </div>
+        <div class="container-box">
+            <div class="settings-row">
+                <p class="settings-text">Example sentences</p>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <p class="settings-text">Nudge frequency</p>
+            </div>
+        </div>
+        </div>
+    </div>
+
   </body>
 </html>
