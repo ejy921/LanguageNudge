@@ -9,6 +9,7 @@ body {
 }
 
 .settings,
+.vocabs,
 .welcome-page,
 .nudge-flashcard,
 .nudge-quiz {
@@ -82,6 +83,33 @@ button {
     width: 23px; 
     height: 23px; 
     margin-inline: 1px;
+    cursor: pointer;
+}
+
+input {
+    outline: none;
+    border-color: initial;
+    box-shadow: none;
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+.mini-popup {
+    position: absolute;
+    top: 60px;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: 1px solid #cfcfcf;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    width: 200px;
+    align-items: center;
+    text-align: center;
 }
 
 .style-option {
