@@ -1,5 +1,30 @@
+import { supabase } from './supabase.js';
+
 document.addEventListener('DOMContentLoaded', function () {
     const popupDeckName = document.getElementById('popupDeckName');
+    const homePage = document.getElementById('homePage');
+    const settingsPage = document.getElementById('settingsPage');
+    const vocabsPage = document.getElementById('vocabsPage');
+    const flashcardPage = document.getElementById('flashcardPage');
+    const quizPage = document.getElementById('quizPage');
+    
+    function hideAllPages() {
+        homePage.style.display = 'none';
+        settingsPage.style.display = 'none';
+        vocabsPage.style.display = 'none';
+        flashcardPage.style.display = 'none';
+        quizPage.style.display = 'none';
+    }
+
+    document.getElementById('homeBtn').addEventListener('click', () => {
+        hideAllPages();
+        homePage.style.display = 'block';
+    });
+
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+        hideAllPages();
+        settingsPage.style.display = 'block';
+    });
 
     document.getElementById('addDeckBtn').addEventListener('click', function() {
         document.getElementById('deckAddPopup').style.display = 'flex';
@@ -25,10 +50,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.log('Deck saved:', newDeck);
                 });
             });
+
+            hideAllPages();
+            // TBD: show vocabs page of that deck
+            vocabsPage.style.display = 'block';  
         } else {
             alert('Please enter a deck name.');
         }
+    });
 
+    document.getElementById('cancelDeckBtn').addEventListener('click', function() {
+        document.getElementById('deckAddPopup').style.display = 'none';
+        popupDeckName.value = '';
     });
 
     document.getElementById('uploadBtn').addEventListener('click', function() {

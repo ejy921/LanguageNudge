@@ -7,8 +7,8 @@
   <body>
 
     <div class="header">LangNudge
-        <img class="icon" src="images/icons/home.png" alt="home" style="position: absolute; right: 10px; top: 10px;">
-        <img class="icon" src="images/icons/settings.png" alt="settings" style="position: absolute; right: 40px; top: 10px;">
+        <img class="icon" id="homeBtn" src="images/icons/home.png" alt="home" style="position: absolute; right: 10px; top: 10px;">
+        <img class="icon" id="settingsBtn" src="images/icons/settings.png" alt="settings" style="position: absolute; right: 40px; top: 10px;">
     </div>
 
     <div class="welcome-page">
@@ -26,7 +26,7 @@
         <button class="sub-button">Japanese</button>
     </div>
 
-    <div class="home">
+    <div class="home" id="homePage">
         <h3 style="padding-left: 10px;">Your decks</h3>
         <div class="container-box">
             <div class="deck-row" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
@@ -41,7 +41,10 @@
             <div class="mini-popup" id="deckAddPopup" style="display: none;">
                 <h3>Add New Deck</h3>
                 <input id="popupDeckName" type="text" placeholder="Deck name"/>
-                <button id="createDeckBtn">Create</button>
+                <div>
+                    <button id="createDeckBtn">Create</button>
+                    <button id="cancelDeckBtn" style="background-color: #b0b0b0">Cancel</button>
+                </div>
             </div>
 
             <input type="file" id="fileInput" accept=".csv,.tsv,.txt" style="display:none;">
@@ -51,7 +54,7 @@
     </div>
     
 
-    <div class="vocabs"> 
+    <div class="vocabs" id="vocabsPage" style="display: none;">
         <ul class="tabs">
             <li><a class="tab1">Lang1</a></li>
             <li><a class="tab2">Lang2</a></li>
@@ -75,19 +78,19 @@
         </div>
     </div>
 
-    <div class="nudge-flashcard">
+    <div class="nudge-flashcard" id="flashcardPage">
         <h1>il bagno</h1>
         <button>Flip</button>
     </div>
 
-    <div class="nudge-quiz">
+    <div class="nudge-quiz" id="quizPage">
         <h1>il bagno</h1>
         <button class="sub-button">the bathroom</button>
         <button class="sub-button">the kitchen</button>
         <button class="sub-button">the bedroom</button>
     </div>
 
-    <div class="settings">
+    <div class="settings" id="settingsPage" style="display: none;">
         <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 10px;">
             <div class="style-option">
                 <h4>Flashcard</h4>
