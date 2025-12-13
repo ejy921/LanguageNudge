@@ -1,16 +1,18 @@
-import { createClient } from "@supabase/supabase-js";
-
-export const supabase = createClient("https://doszhbvpoawlgsezbkiz.supabase.co", "sb_publishable_mgJOABvdgM4BaWv19FRunA_WMOJeNOL");
-
-
-async function signUpNewUser() {
+async function signUpNewUser(email, password) {
     const { data, error } = await supabase.auth.signUp({
-        email: 'valid.email@supabase.io',
-        password: 'example-password',
-        options: {
-            emailRediretTo: 'htttps://example.com/welcome'
-        },
-    })
+        email,
+        password
+    });
+
+    if (error) {
+        console.error('Sign up error:', error.message);
+        return;
+    }
+    console.log('Sign up success for user', data);
+
+    document.getElementById('signUpPage').style.display = 'none';
+    document.getElementById('signInPage').style.display = 'none';
+    document.getElementById('welcomePage').style.display = 'block';
 }
 
 async function signIn(email, password) {
@@ -61,13 +63,17 @@ document.addEventListener('DOMContentLoaded', function () {
     
     document.getElementById('signUpBtn').addEventListener('click', () => {
         signUpNewUser(document.getElementById('email').value, document.getElementById('password'));
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
     });
 
     document.getElementById('signInBtn').addEventListener('click', () => {
         signIn(document.getElementById('email').value, document.getElementById('password'));
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
     });
 
-    document.getElemendById('goToSignin').addEventListener('click', (e) => {
+    document.getElementById('goToSignIn').addEventListener('click', (e) => {
         e.preventDefault();
         document.getElementById('signUpPage').style.display = 'none';
         document.getElementById('signInPage').style.display = 'block';
