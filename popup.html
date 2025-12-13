@@ -11,11 +11,38 @@
         <img class="icon" id="settingsBtn" src="images/icons/settings.png" alt="settings" style="position: absolute; right: 40px; top: 10px;">
     </div>
 
-    <div class="welcome-page">
+    <div class="signup-page" id="signUpPage">
         <h2>Welcome to LangNudge!</h2>
+        <p style="font-size: 12px; margin-bottom: 20px;">Get microdoses of vocabulary during your day, with both quiz and flashcard modes.</p>
+        <div style="display: flex; flex-direction: column; align-items: center; row-gap: 7px; margin-bottom: 0px;">
+            <input type="email" class="text-input" placeholder="Email">
+            <input type="password" class="text-input" placeholder="Password">
+            <button id="signUpBtn" style="margin-bottom: 0px;">Sign Up</button>
+            <div style = "display: flex; flex-direction: row; margin-top: 0px; column-gap: 3px;">
+                <p style="font-size: 10px; margin: 0;">Already have an account?</p>
+                <p style="font-size: 10px; margin: 0;">
+                    <a href="#" id="goToSignIn">Sign in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="signin-page" id="signInPage">
+        <h2>Welcome back to LangNudge!</h2>
+        <div style="display: flex; flex-direction: column; align-items: center; row-gap: 7px; margin-bottom: 0px;">
+            <input type="email" class="text-input" placeholder="Email">
+            <input type="password" class="text-input" placeholder="Password">
+            <button id="signInBtn" style="margin-bottom: 0px;">Sign In</button>
+        </div>
+    </div>
+
+    <script src="dist/popup.bundle.js"></script>
+
+    <div class="welcome-page">
+        <h2>Let's get started!</h2>
         <p>Upload your vocab file:</p>
         <button>Upload
-            <img class="icon" src="images/icons/upload.png" alt="upload">
+            <img class="icon" id="uploadBtn" src="images/icons/upload.png" alt="upload">
         </button>
         <p>Or try one of our curated selections!</p>
         <button class="sub-button">Chinese</button>
@@ -31,9 +58,9 @@
         <div class="container-box">
             <div class="deck-row" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
                 <p>Chinese</p>
-                <button>View deck</button>
-                <button>Review</button>
-                <button>Quiz</button>
+                <button id="viewDeckBtn">View deck</button>
+                <button id="reviewBtn">Review</button>
+                <button id="quizBtn">Quiz</button>
             </div>
         </div>
         <div class="container-box" style="display: flex; flex-direction: row;border-style: dashed; justify-content: center; align-items: center;">
@@ -61,7 +88,7 @@
             <li><a class="tab3">Lang3</a></li>
         </ul>
         <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin: 10px;">
-            <input type="text" placeholder="Search vocab..." style="margin-right: 0px; border-radius: 10px; border-color: lightgrey; padding: 0; padding-inline: 8px; width: 55%; height: 20px; font-size: 10px;">
+            <input type="text" class="text-input" placeholder="Search vocab...">
             <p style="font-size: 13px; margin: 0; padding: 0;">Sort by</p>
             <img class="icon" src="images/icons/add.png" alt="add" style="width: 15px; height: 15px;">
             <img class="icon" src="images/icons/delete.png" alt="delete" style="width: 15px; height: 15px;">
@@ -120,6 +147,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
     <script src="popup.js"></script>
 
   </body>

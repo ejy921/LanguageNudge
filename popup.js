@@ -1,4 +1,31 @@
-import { supabase } from './supabase.js';
+import { createClient } from "@supabase/supabase-js";
+
+export const supabase = createClient("https://doszhbvpoawlgsezbkiz.supabase.co", "sb_publishable_mgJOABvdgM4BaWv19FRunA_WMOJeNOL");
+
+
+async function signUpNewUser() {
+    const { data, error } = await supabase.auth.signUp({
+        email: 'valid.email@supabase.io',
+        password: 'example-password',
+        options: {
+            emailRediretTo: 'htttps://example.com/welcome'
+        },
+    })
+}
+
+async function signIn(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+        console.error(error.message);
+    } else {
+        console.log('Logged in user:', data.user);
+    }
+}
+
+async function signOut() {
+  const { error } = await supabase.auth.signOut()
+}
+
 
 document.addEventListener('DOMContentLoaded', function () {
     const popupDeckName = document.getElementById('popupDeckName');
@@ -6,7 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const settingsPage = document.getElementById('settingsPage');
     const vocabsPage = document.getElementById('vocabsPage');
     const flashcardPage = document.getElementById('flashcardPage');
-    const quizPage = document.getElementById('quizPage');
+    const quizPage = document.getElementById('quizPage'); 
+
+    // Screen changes
     
     function hideAllPages() {
         homePage.style.display = 'none';
@@ -26,13 +55,34 @@ document.addEventListener('DOMContentLoaded', function () {
         settingsPage.style.display = 'block';
     });
 
-    document.getElementById('addDeckBtn').addEventListener('click', function() {
+
+    // Authentication
+
+    
+    document.getElementById('signUpBtn').addEventListener('click', () => {
+        signUpNewUser(document.getElementById('email').value, document.getElementById('password'));
+    });
+
+    document.getElementById('signInBtn').addEventListener('click', () => {
+        signIn(document.getElementById('email').value, document.getElementById('password'));
+    });
+
+    document.getElemendById('goToSignin').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('signUpPage').style.display = 'none';
+        document.getElementById('signInPage').style.display = 'block';
+    });
+
+
+    // Manage Decks + Cards
+
+    document.getElementById('addDeckBtn').addEventListener('click', () => {
         document.getElementById('deckAddPopup').style.display = 'flex';
         popupDeckName.value = '';
         popupDeckName.focus();
     });
 
-    document.getElementById('createDeckBtn').addEventListener('click', function() {
+    document.getElementById('createDeckBtn').addEventListener('click', () => {
         const deckName = popupDeckName.value.trim();
         if (deckName) {
             console.log('Creating deck:', deckName);
@@ -59,16 +109,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    document.getElementById('cancelDeckBtn').addEventListener('click', function() {
+    document.getElementById('cancelDeckBtn').addEventListener('click', () => {
         document.getElementById('deckAddPopup').style.display = 'none';
         popupDeckName.value = '';
     });
 
-    document.getElementById('uploadBtn').addEventListener('click', function() {
+    document.getElementById('uploadBtn').addEventListener('click', () => {
         document.getElementById('fileInput').click();
     });
 
-    document.getElementById('fileInput').addEventListener('change', function(event) {
+    document.getElementById('fileInput').addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
