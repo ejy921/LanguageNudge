@@ -62,13 +62,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     
     document.getElementById('signUpBtn').addEventListener('click', () => {
-        signUpNewUser(document.getElementById('email').value, document.getElementById('password'));
-        document.getElementById('email').value = '';
-        document.getElementById('password').value = '';
+        signUpNewUser(document.getElementById('signUpEmail').value, document.getElementById('signUpPassword').value);
+        document.getElementById('signUpEmail').value = '';
+        document.getElementById('signUpPassword').value = '';
     });
 
     document.getElementById('signInBtn').addEventListener('click', () => {
-        signIn(document.getElementById('email').value, document.getElementById('password'));
+        signIn(document.getElementById('signInEmail').value, document.getElementById('signInPassword').value);
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
     });
