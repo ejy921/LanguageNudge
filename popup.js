@@ -1,18 +1,37 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient("https://doszhbvpoawlgsezbkiz.supabase.co", "sb_publishable_mgJOABvdgM4BaWv19FRunA_WMOJeNOL");
+
+let isSigningUp = false;
+
 async function signUpNewUser(email, password) {
-    const { data, error } = await supabase.auth.signUp({
-        email,
-        password
-    });
+    if (isSigningUp) return;
+    isSigningUp = true;
 
-    if (error) {
-        console.error('Sign up error:', error.message);
-        return;
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password
+        });
+
+        if (error) {
+            if (error.message.includes('User already registered')) {
+                alert('Looks like your email is already registered. Please log in instead.')
+            } else {
+                console.error('Sign up error:', error.message);
+            }
+            console.error('Sign up error:', error.message);
+            return;
+        }
+        
+        console.log('Sign up success for user', data);
+
+        document.getElementById('signUpPage').style.display = 'none';
+        document.getElementById('signInPage').style.display = 'none';
+        document.getElementById('welcomePage').style.display = 'block';
+    } finally {
+        isSigningUp = false;
     }
-    console.log('Sign up success for user', data);
-
-    document.getElementById('signUpPage').style.display = 'none';
-    document.getElementById('signInPage').style.display = 'none';
-    document.getElementById('welcomePage').style.display = 'block';
 }
 
 async function signIn(email, password) {
