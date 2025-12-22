@@ -163,20 +163,19 @@ input {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-inline: 5px;
-    padding-block: 5px;
+    margin-inline: 0px;
+    padding-block: 0px;
 }
 
 .settings-text {
-    font-size: 12px;
+    font-size: 5px;
     margin-block: 1px;
-    margin-inline: 3px;
+    padding: 0px;
 }
 
 .container-box p,
 .container-box button {
-  font-size: 12px;
-  padding: 7px;
+  font-size: 11px;
   padding-inline: 7px;
   margin: 3px;
 }

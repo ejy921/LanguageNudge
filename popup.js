@@ -1,34 +1,68 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient("https://doszhbvpoawlgsezbkiz.supabase.co", "sb_publishable_mgJOABvdgM4BaWv19FRunA_WMOJeNOL");
+const chromeStorageAdapter = {
+    getItem: (key) => {
+        return new Promise((resolve) => {
+            chrome.storage.local.get([key], (result) => {
+                resolve(result[key] || null);
+            });
+        });
+    }, 
+    setItem: (key, value) => {
+        chrome.storage.local.set({ [key]: value });
+    },
+    removeItem: (key) => {
+        chrome.storage.local.remove([key]);
+    }
+}
 
+const supabase = createClient(
+  'https://doszhbvpoawlgsezbkiz.supabase.co',
+  'sb_publishable_mgJOABvdgM4BaWv19FRunA_WMOJeNOL',
+  {
+    auth: {
+        storage: chromeStorageAdapter,
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false
+    }
+  }
+);
 let isSigningUp = false;
+
+// functions
 
 async function signUpNewUser(email, password) {
     if (isSigningUp) return;
     isSigningUp = true;
-
+    if (password.length < 6) {
+        document.getElementById('passwordTooShort').style.display = 'block';
+        isSigningUp = false;
+        return;
+    }
     try {
         const { data, error } = await supabase.auth.signUp({
             email,
             password
         });
-
         if (error) {
-            if (error.message.includes('User already registered')) {
-                alert('Looks like your email is already registered. Please log in instead.')
-            } else {
-                console.error('Sign up error:', error.message);
+            if (error.code === 'user_already_exists') {
+                document.getElementById('userAlreadyExists').style.display = 'block';
             }
-            console.error('Sign up error:', error.message);
+            console.error(error);
             return;
         }
-        
-        console.log('Sign up success for user', data);
+        if (data?.user) {
+            console.log('Sign up success for user', data.user.id);
 
-        document.getElementById('signUpPage').style.display = 'none';
-        document.getElementById('signInPage').style.display = 'none';
-        document.getElementById('welcomePage').style.display = 'block';
+            document.getElementById('signUpEmail').value = '';
+            document.getElementById('signUpPassword').value = '';
+
+            document.getElementById('signUpPage').style.display = 'none';
+            document.getElementById('signInPage').style.display = 'none';
+            document.getElementById('welcomePage').style.display = 'block';
+            return;
+        }
     } finally {
         isSigningUp = false;
     }
@@ -40,21 +74,35 @@ async function signIn(email, password) {
         console.error(error.message);
     } else {
         console.log('Logged in user:', data.user);
+        document.getElementById('signInPage').style.display = 'none';
+        document.getElementById('homePage').style.display = 'block';
+        
     }
 }
 
 async function signOut() {
-  const { error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error(error.message);
+  }
 }
 
+//==============================//
+// DOM Loaded                   //
+//==============================//
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     const popupDeckName = document.getElementById('popupDeckName');
+    const signUpPage = document.getElementById('signUpPage');
     const homePage = document.getElementById('homePage');
+    const welcomePage = document.getElementById('welcomePage');
     const settingsPage = document.getElementById('settingsPage');
     const vocabsPage = document.getElementById('vocabsPage');
     const flashcardPage = document.getElementById('flashcardPage');
     const quizPage = document.getElementById('quizPage'); 
+    const signInPage = document.getElementById('signInPage');
+
+    const { data: { session }, error } = await supabase.auth.getSession();
 
     // Screen changes
     
@@ -64,38 +112,86 @@ document.addEventListener('DOMContentLoaded', function () {
         vocabsPage.style.display = 'none';
         flashcardPage.style.display = 'none';
         quizPage.style.display = 'none';
+        welcomePage.style.display = 'none';
+        signUpPage.style.display = 'none';
+        signInPage.style.display = 'none';
+    }
+
+    if (session) {
+        hideAllPages();
+        homePage.style.display = 'block';
+    } else {
+        hideAllPages();
+        signUpPage.style.display = 'block';
+        document.getElementById('signUpEmail').focus();
     }
 
     document.getElementById('homeBtn').addEventListener('click', () => {
-        hideAllPages();
-        homePage.style.display = 'block';
+        if (session) {
+            hideAllPages();
+            homePage.style.display = 'block';
+        }
     });
 
     document.getElementById('settingsBtn').addEventListener('click', () => {
-        hideAllPages();
-        settingsPage.style.display = 'block';
+        if (session) {
+            hideAllPages();
+            settingsPage.style.display = 'block';
+        }
     });
 
 
     // Authentication
 
+    const signUpBtn = document.getElementById('signUpBtn');
+    const signInBtn = document.getElementById('signInBtn');
+
+    signUpBtn.onclick = async () => {
+        const emailInput = document.getElementById('signUpEmail');
+        const passwordInput = document.getElementById('signUpPassword');
+
+        // disable button to prevent double-clicks
+        signUpBtn.disabled = true;
+
+        await signUpNewUser(emailInput.value, passwordInput.value);
+        // re-enable button 
+        signUpBtn.disabled = false;
+
+    }
     
-    document.getElementById('signUpBtn').addEventListener('click', () => {
-        signUpNewUser(document.getElementById('signUpEmail').value, document.getElementById('signUpPassword').value);
-        document.getElementById('signUpEmail').value = '';
-        document.getElementById('signUpPassword').value = '';
+    document.getElementById('signUpPassword').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('signUpBtn').click();
+        }
     });
 
-    document.getElementById('signInBtn').addEventListener('click', () => {
-        signIn(document.getElementById('signInEmail').value, document.getElementById('signInPassword').value);
-        document.getElementById('email').value = '';
-        document.getElementById('password').value = '';
-    });
+    signInBtn.onclick = async () => {
+        const emailInput = document.getElementById('signInEmail');
+        const passwordInput = document.getElementById('signInPassword');
+
+        signInBtn.disabled = true;
+        await signIn(emailInput.value, passwordInput.value);
+        signInBtn.disabled = false;
+    }
+
+    document.getElementById('signInPassword').addEventListener('keypress', (e) => {
+        if (e.key == 'Enter') {
+            document.getElementById('signInBtn').click();
+        }
+    })
 
     document.getElementById('goToSignIn').addEventListener('click', (e) => {
         e.preventDefault();
-        document.getElementById('signUpPage').style.display = 'none';
-        document.getElementById('signInPage').style.display = 'block';
+        hideAllPages();
+        signInPage.style.display = 'block';
+        document.getElementById('signInEmail').focus();
+    });
+
+    document.getElementById('signOutBtn').addEventListener('click', async () => {
+        console.log('Attempt to sign out');
+        await signOut();
+        hideAllPages();
+        signInPage.style.display = 'block';
     });
 
 

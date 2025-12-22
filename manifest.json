@@ -7,6 +7,10 @@
     "default_popup": "popup.html",
     "default_icon": "images/logo/icon.png"
   },
+  "background": {
+    "service_worker": "dist/background.bundle.js",
+    "type": "module"
+  },
   "permissions": [
     "storage",
     "activeTab",

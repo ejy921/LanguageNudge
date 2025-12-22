@@ -17,6 +17,8 @@
         <div style="display: flex; flex-direction: column; align-items: center; row-gap: 7px; margin-bottom: 0px;">
             <input id="signUpEmail" type="email" class="text-input" placeholder="Email">
             <input id="signUpPassword" type="password" class="text-input" placeholder="Password">
+            <p id="passwordTooShort" style="font-size: 9px; color: red; padding: 0; margin: 0; display: none;">Password must be at least 6 characters</p>
+            <p id="userAlreadyExists" style="font-size: 9px; color: red; padding: 0; margin: 0; display: none;">There's already an account with your email. Please sign in instead.</p>
             <button id="signUpBtn" style="margin-bottom: 0px;">Sign Up</button>
             <div style = "display: flex; flex-direction: row; margin-top: 0px; column-gap: 3px;">
                 <p style="font-size: 10px; margin: 0;">Already have an account?</p>
@@ -33,6 +35,12 @@
             <input id="signInEmail" type="email" class="text-input" placeholder="Email">
             <input id="signInPassword" type="password" class="text-input" placeholder="Password">
             <button id="signInBtn" style="margin-bottom: 0px;">Sign In</button>
+            <div style = "display: flex; flex-direction: row; margin-top: 0px; column-gap: 3px;">
+                <p style="font-size: 10px; margin: 0;">New to LangNudge?</p>
+                <p style="font-size: 10px; margin: 0;">
+                    <a href="#" id="goToSignIn">Sign up</a>
+                </p>
+            </div>
         </div>
     </div>
 
@@ -144,7 +152,10 @@
                 <p class="settings-text">Nudge frequency</p>
             </div>
         </div>
-        </div>
+
+        <button id="signOutBtn" style="background-color: red;">Sign Out</button>
+
+    </div>
     </div>
 
     <script type="module" src="dist/popup.bundle.js"></script>

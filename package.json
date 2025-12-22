@@ -8,7 +8,7 @@
   "main": "background.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild popup.js --bundle --outfile=dist/popup.bundle.js"
+    "build": "esbuild popup.bundle=popup.js background.bundle=background.js --bundle --outdir=dist"
   },
   "repository": {
     "type": "git",
