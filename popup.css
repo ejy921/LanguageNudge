@@ -10,6 +10,7 @@ body {
 
 .settings,
 .vocabs,
+.signup-page,
 .welcome-page,
 .home,
 .signin-page,
@@ -55,12 +56,19 @@ button {
     border: none;
     padding: 10px 20px;
     text-align: center;
-    display: inline-block;
+    justify-content: center;
+    display: inline-flex;
+    gap: 3px;
     font-size: 14px;
     border-radius: 10px;
     cursor: pointer;
     margin-inline: 1px;
     margin-bottom: 10px;
+}
+
+button:active {
+    translate: 0px 1px;
+    transition-duration: 200;
 }
 
 .sub-button {

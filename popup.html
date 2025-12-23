@@ -38,19 +38,17 @@
             <div style = "display: flex; flex-direction: row; margin-top: 0px; column-gap: 3px;">
                 <p style="font-size: 10px; margin: 0;">New to LangNudge?</p>
                 <p style="font-size: 10px; margin: 0;">
-                    <a href="#" id="goToSignIn">Sign up</a>
+                    <a href="#" id="goToSignUp">Sign up</a>
                 </p>
             </div>
         </div>
     </div>
 
-    <script src="dist/popup.bundle.js"></script>
-
     <div class="welcome-page" id="welcomePage">
         <h2>Let's get started!</h2>
         <p>Upload your vocab file:</p>
-        <button>Upload
-            <img class="icon" id="uploadBtn" src="images/icons/upload.png" alt="upload">
+        <button id="uploadBtn">Upload
+            <img class="icon" src="images/icons/upload.png" alt="upload">
         </button>
         <p>Or try one of our curated selections!</p>
         <button class="sub-button">Chinese</button>
@@ -61,16 +59,15 @@
         <button class="sub-button">Japanese</button>
     </div>
 
+
     <div class="home" id="homePage">
         <h3 style="padding-left: 10px;">Your decks</h3>
-        <div class="container-box">
-            <div class="deck-row" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-                <p>Chinese</p>
-                <button id="viewDeckBtn">View deck</button>
-                <button id="reviewBtn">Review</button>
-                <button id="quizBtn">Quiz</button>
-            </div>
+        
+        <!-- container for existing decks -->
+        <div id="decksContainer">
         </div>
+        
+        <!-- new deck container -->
         <div class="container-box" style="display: flex; flex-direction: row;border-style: dashed; justify-content: center; align-items: center;">
             <img class="icon" id="addDeckBtn"src="images/icons/add.png" alt="add" style="width: 20px; height: 20px;">
             <div class="mini-popup" id="deckAddPopup" style="display: none;">
@@ -81,9 +78,10 @@
                     <button id="cancelDeckBtn" style="background-color: #b0b0b0">Cancel</button>
                 </div>
             </div>
-
-            <input type="file" id="fileInput" accept=".csv,.tsv,.txt" style="display:none;">
-            <button id="uploadBtn">Upload</button>
+            <input type="file" class="fileInput" accept=".csv,.tsv,.txt" style="display:none;">
+            <button class="uploadBtn" style="padding-top: 7px; padding-bottom: 4px;">Upload
+                <img class="icon" src="images/icons/upload.png" alt="upload" style="width: 13px; height: 13px; margin-bottom: 3px;">
+            </button>
             <pre id="output"></pre>
         </div>
     </div>
@@ -98,11 +96,19 @@
         <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin: 10px;">
             <input type="text" class="text-input" placeholder="Search vocab...">
             <p style="font-size: 13px; margin: 0; padding: 0;">Sort by</p>
-            <img class="icon" src="images/icons/add.png" alt="add" style="width: 15px; height: 15px;">
+            <img class="icon" id="addVocabBtn" src="images/icons/add.png" alt="add" style="width: 15px; height: 15px;">
             <img class="icon" src="images/icons/delete.png" alt="delete" style="width: 15px; height: 15px;">
         </div>
-        <div class="container-box" style="border-width: 1px; border-color:lightgray; padding: 0;">
-            <div class="vocab-row">
+        <div class="mini-popup" id="vocabAddPopup">
+            <input id="vocabFront" type="text"/>
+            <input id="vocabFront" type="text"/>
+            <div>
+                    <button id="createVocabBtn">Create</button>
+                    <button id="cancelVocabBtn" style="background-color: #b0b0b0">Cancel</button>
+                </div>
+        </div>
+        <div class="container-box" id="rowContainer" style="border-width: 1px; border-color:lightgray; padding: 0;">
+            <div class="vocab-row" id="vocabRow">
                 <p>il bagno</p>
                 <p>the bathroom</p>
             </div>
@@ -153,7 +159,7 @@
             </div>
         </div>
 
-        <button id="signOutBtn" style="background-color: red;">Sign Out</button>
+        <button id="signOutBtn" style="background-color: red; padding: 8px;">Sign Out</button>
 
     </div>
     </div>

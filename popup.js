@@ -87,6 +87,50 @@ async function signOut() {
   }
 }
 
+async function displayDecks() {
+    const decksContainer = document.getElementById('decksContainer');
+    const { data: decks, error } = await supabase
+        .from('decks')
+        .select('*');
+    if (error) {
+        console.error('Error fetching decks:', error);
+        return;
+    }
+    // avoid duplicates
+    decksContainer.innerHTML = '';
+
+    decks.forEach(deck => {
+        const deckElement = document.createElement('div');
+        deckElement.className = 'container-box';
+        deckElement.innerHTML = `
+            <div class="deck-row" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+                <p>${deck.name}</p>
+                <button class="viewDeckBtn" data-id="${deck.id}">View deck</button>
+                <button class="reviewBtn" data-id="${deck.id}">Review</button>
+                <button class="quizBtn" data-id="${deck.id}">Quiz</button>
+            </div>
+        `;
+        decksContainer.appendChild(deckElement);
+    });
+
+}
+
+// async function displayDecks() {
+//     const rowContainer = document.getElementById('rowContainer');
+//     const { data: vocab, error } = await supabase
+//         .from('vocab')
+//         .select('*');
+//     if (error) {
+//         console.error('Error fetching vocab:', error);
+//         return;
+//     }
+
+//     decks.forEach(deck => {
+
+//     })
+    
+// }
+
 //==============================//
 // DOM Loaded                   //
 //==============================//
@@ -120,6 +164,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (session) {
         hideAllPages();
         homePage.style.display = 'block';
+        displayDecks();
     } else {
         hideAllPages();
         signUpPage.style.display = 'block';
@@ -156,7 +201,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         await signUpNewUser(emailInput.value, passwordInput.value);
         // re-enable button 
         signUpBtn.disabled = false;
-
     }
     
     document.getElementById('signUpPassword').addEventListener('keypress', (e) => {
@@ -187,6 +231,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('signInEmail').focus();
     });
 
+    document.getElementById('goToSignUp').addEventListener('click', (e) => {
+        e.preventDefault();
+        hideAllPages();
+        signUpPage.style.display = 'block';
+        document.getElementById('signInEmail').focus();
+    });
+
     document.getElementById('signOutBtn').addEventListener('click', async () => {
         console.log('Attempt to sign out');
         await signOut();
@@ -203,31 +254,36 @@ document.addEventListener('DOMContentLoaded', async function () {
         popupDeckName.focus();
     });
 
-    document.getElementById('createDeckBtn').addEventListener('click', () => {
+    // Create new deck and store in Supabase
+    document.getElementById('createDeckBtn').addEventListener('click', async () => {
         const deckName = popupDeckName.value.trim();
-        if (deckName) {
-            console.log('Creating deck:', deckName);
-            document.getElementById('deckAddPopup').style.display = 'none';
-
-            const newDeck = {
-                id: crypto.randomUUID(),
-                name: deckName,
-            };
-
-            chrome.storage.local.get(['decks'], function(result) {
-                const decks = result.decks || [];
-                decks.push(newDeck);
-                chrome.storage.local.set({ decks }, function() {
-                    console.log('Deck saved:', newDeck);
-                });
-            });
-
-            hideAllPages();
-            // TBD: show vocabs page of that deck
-            vocabsPage.style.display = 'block';  
-        } else {
-            alert('Please enter a deck name.');
+        if (!deckName) {
+            alert('Please enter a deck name');
+            return;
         }
+
+        const {
+            data: { user },
+            error: userError
+        } = await supabase.auth.getUser();
+        if ( userError || !user ) {
+            console.error('No user logging in');
+            return;
+        }
+        // Get rid of popup
+        document.getElementById('deckAddPopup').style.display = 'none';
+
+        const newDeck = {
+            id: crypto.randomUUID(),
+            name: deckName,
+            user_id: user.id
+        };
+        const { data, error } = await supabase
+            .from('decks')
+            .insert([newDeck])
+            .select();
+        console.log('Deck in supabase for', data[0]?.user_id, data);
+        homePage.style.display = 'block';  
     });
 
     document.getElementById('cancelDeckBtn').addEventListener('click', () => {
@@ -235,45 +291,66 @@ document.addEventListener('DOMContentLoaded', async function () {
         popupDeckName.value = '';
     });
 
-    document.getElementById('uploadBtn').addEventListener('click', () => {
-        document.getElementById('fileInput').click();
-    });
 
-    document.getElementById('fileInput').addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const content = e.target.result;
-                document.getElementById('output').textContent = content;
-            };
-            reader.readAsText(file);
+
+    document.getElementById('decksContainer').addEventListener('click', (e) => {
+        if (e.target.classList.contains('viewDeckBtn')) {
+            const deckId = e.target.getAttribute('data-id');
+            // Navigate to view deck page with this ID
+            hideAllPages();
+            vocabsPage.style.display = 'block';
         }
     });
+
+    document.querySelectorAll('.uploadBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.closest('body').querySelector('.fileInput').click();
+            console.log('Button clicked');
+        })
+    })
+
+    // document.querySelectorAll('.fileInput').forEach(input => {
+    //     addEventListener('change', (event) => {
+    //         const file = event.target.files[0];
+    //         if (!file) return;
+    //         const reader = new FileReader();
+    //         reader.onload = function(e) {
+    //             const content = e.target.result;
+    //             document.getElementById('output').textContent = content;
+    //         };
+    //         reader.readAsText(file);
+    //     });
+    // });
+
+    document.getElementById('addVocabBtn').addEventListener('click', () => {
+        
+    })
 });
 
 function parseData(data) {
+    if (!data || typeof data !== 'string') return [];
+
+    // 1. Better Delimiter Detection (prioritize Tab -> Semicolon -> Comma)
+    const firstLine = data.split('\n')[0];
     let delimiter = ',';
-    if (data.indexOf('\t') !== -1) {
-        delimiter = '\t';
-    } else if (data.indexOf(';') !== -1) {
-        delimiter = ';';
-    }
+    if (firstLine.includes('\t')) delimiter = '\t';
+    else if (firstLine.includes(';')) delimiter = ';';
 
-    const lines = data.trim().split('\n');
-    if (!delimiter) {
-        return lines;
-    }
+    const lines = data.trim().split(/\r?\n/); // Handles both Windows (\r\n) and Unix (\n)
+    
+    const splitRegex = new RegExp(`${delimiter}(?=(?:(?:[^"]*"){2})*[^"]*$)`);
 
-    const headers = lines[0].split(delimiter).map(h => h.trim());
+    const headers = lines[0].split(splitRegex).map(h => h.replace(/^"|"$/g, '').trim());
+
     const parsedData = lines.slice(1).map(line => {
-        const values = line.split(delimiter).map(v => v.trim());
+        const values = line.split(splitRegex).map(v => v.replace(/^"|"$/g, '').trim());
         const entry = {};
+        
         headers.forEach((header, index) => {
-            entry[header] = values[index] || '';
+            entry[header] = values[index] ?? '';
         });
         return entry;
     });
-    console.log(parsedData);
+
     return parsedData;
 }
