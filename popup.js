@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // });
 
     document.getElementById('addVocabBtn').addEventListener('click', () => {
-        
+        document.getElementById('vocabAddPopup').style.display = 'flex';
     })
 });
 
