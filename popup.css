@@ -118,16 +118,18 @@ input {
 
 .mini-popup {
     position: absolute;
-    top: 60px;
+    inset: 0;
+    margin: auto;
     display: flex;
     flex-direction: column;
     background-color: white;
     border: 1px solid #cfcfcf;
     border-radius: 5px;
-    padding: 10px;
+    padding: 5px;
     box-shadow: 0px 8px 8px 3px rgba(0,0,0,0.1);
     z-index: 1;
     width: 200px;
+    height: fit-content;
     align-items: center;
     text-align: center;
 }

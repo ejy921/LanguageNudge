@@ -115,21 +115,27 @@ async function displayDecks() {
 
 }
 
-// async function displayDecks() {
-//     const rowContainer = document.getElementById('rowContainer');
-//     const { data: vocab, error } = await supabase
-//         .from('vocab')
-//         .select('*');
-//     if (error) {
-//         console.error('Error fetching vocab:', error);
-//         return;
-//     }
-
-//     decks.forEach(deck => {
-
-//     })
+async function displayVocabCard(currentDeckId) {
+    const vocabRowContainer = document.getElementById('vocabRowContainer');
+    vocabRowContainer.innerHTML = 'Loading';
     
-// }
+    const { data: vocabs, error } = await supabase
+        .from('vocab')
+        .select('*')
+        .eq('deck_id', currentDeckId);
+    if (error) {
+        console.error('Error fetching vocab', error);
+        return;
+    }
+
+    vocabRowContainer.innerHTML = '';
+    vocabs.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'vocab-card';
+        div.innerHTML = `<strong>${item.front}</strong>: ${item.back}`;
+        vocabRowContainer.appendChild(div);
+    });
+}
 
 //==============================//
 // DOM Loaded                   //
@@ -222,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (e.key == 'Enter') {
             document.getElementById('signInBtn').click();
         }
-    })
+    });
 
     document.getElementById('goToSignIn').addEventListener('click', (e) => {
         e.preventDefault();
@@ -246,7 +252,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
 
-    // Manage Decks + Cards
+    // Manage Decks
+
+    let currentDeckId = null;
 
     document.getElementById('addDeckBtn').addEventListener('click', () => {
         document.getElementById('deckAddPopup').style.display = 'flex';
@@ -262,19 +270,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
-        const {
-            data: { user },
-            error: userError
-        } = await supabase.auth.getUser();
+        const { data: { user }, error: userError} = await supabase.auth.getUser();
         if ( userError || !user ) {
             console.error('No user logging in');
             return;
         }
         // Get rid of popup
         document.getElementById('deckAddPopup').style.display = 'none';
-
+        currentDeckId = crypto.randomUUID();
         const newDeck = {
-            id: crypto.randomUUID(),
+            id: currentDeckId,
             name: deckName,
             user_id: user.id
         };
@@ -296,8 +301,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     document.getElementById('decksContainer').addEventListener('click', (e) => {
         if (e.target.classList.contains('viewDeckBtn')) {
             const deckId = e.target.getAttribute('data-id');
-            // Navigate to view deck page with this ID
+            currentDeckId = deckId;
             hideAllPages();
+            // TODO: await displayCards()
             vocabsPage.style.display = 'block';
         }
     });
@@ -322,9 +328,66 @@ document.addEventListener('DOMContentLoaded', async function () {
     //     });
     // });
 
+    // Manage Cards
+
+    const vocabFront = document.getElementById('vocabFront');
+    const vocabBack = document.getElementById('vocabBack');
+
     document.getElementById('addVocabBtn').addEventListener('click', () => {
         document.getElementById('vocabAddPopup').style.display = 'flex';
-    })
+    });
+
+    vocabFront.addEventListener('keypress', (e) => {
+        if (e.key == 'Enter') {
+            vocabBack.focus();
+        }
+    });
+
+    // document.getElementById('vocabBack').addEventListener('keypress', (e) => {
+    //     if (e.key == 'Enter') {
+    //         // TODO: createVocab
+    //     }
+    // });
+
+    document.getElementById('createVocabBtn').addEventListener('click', async () => {
+        const frontText = vocabFront.value.trim();
+        const backText = vocabBack.value.trim();
+        if (!frontText || !backText) {
+            alert('Please insert values for both sides of the card');
+            return;
+        }        
+        
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if ( userError || !user ) {
+            console.error('You must be logged in to create cards.');
+            return;
+        }
+
+        document.getElementById('vocabAddPopup').style.display = 'none';
+
+        const newVocab = {
+            id: crypto.randomUUID(),
+            deck_id: currentDeckId,
+            user_id: user.id,
+            front: frontText,
+            back: backText
+        };
+
+        const { data, error } = await supabase
+            .from('vocab')
+            .insert([newVocab])
+            .select();
+        console.log(newVocab);
+        if (error) {
+            console.error('Error inserting vocab:', error.message);
+            alert('Failed to save card');
+        } else {
+            console.log('Created card', data);
+            document.getElementById('vocabAddPopup').style.display = 'none';
+            vocabFront.value = '';
+            vocabBack.value = '';
+        }
+    });
 });
 
 function parseData(data) {
