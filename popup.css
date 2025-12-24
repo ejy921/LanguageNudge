@@ -8,6 +8,13 @@ body {
     margin-bottom: 10px;
 }
 
+.vocabs {
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+
 .settings,
 .vocabs,
 .signup-page,

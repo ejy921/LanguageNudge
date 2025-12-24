@@ -128,12 +128,20 @@ async function displayVocabCard(currentDeckId) {
         return;
     }
 
+    console.log(currentDeckId);
+    console.log(vocabs);
+
     vocabRowContainer.innerHTML = '';
-    vocabs.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'vocab-card';
-        div.innerHTML = `<strong>${item.front}</strong>: ${item.back}`;
-        vocabRowContainer.appendChild(div);
+    vocabs.forEach(vocab => {
+        const deckElement = document.createElement('div');
+        deckElement.className = 'container-box';
+        deckElement.innerHTML = `
+            <div class="vocab-row" id="vocabRow">
+                <p>${vocab.front}</p>
+                <p>${vocab.back}</p>
+            </div>
+        `;
+        vocabRowContainer.appendChild(deckElement);
     });
 }
 
@@ -149,7 +157,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const settingsPage = document.getElementById('settingsPage');
     const vocabsPage = document.getElementById('vocabsPage');
     const flashcardPage = document.getElementById('flashcardPage');
-    const quizPage = document.getElementById('quizPage'); 
+    const quizPage = document.getElementById('quizPage');
     const signInPage = document.getElementById('signInPage');
 
     const { data: { session }, error } = await supabase.auth.getSession();
@@ -168,6 +176,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     if (session) {
+        await displayDecks();
         hideAllPages();
         homePage.style.display = 'block';
         displayDecks();
@@ -305,6 +314,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             hideAllPages();
             // TODO: await displayCards()
             vocabsPage.style.display = 'block';
+            displayVocabCard(currentDeckId);
         }
     });
 
@@ -388,7 +398,15 @@ document.addEventListener('DOMContentLoaded', async function () {
             vocabBack.value = '';
         }
     });
-});
+    
+    document.getElementById('cancelVocabBtn').addEventListener('click', () => {
+        document.getElementById('vocabAddPopup').style.display = 'none';
+        vocabFront.value = '';
+        vocabBack.value = '';
+    });
+
+}); // DOMContent loaded
+
 
 function parseData(data) {
     if (!data || typeof data !== 'string') return [];
