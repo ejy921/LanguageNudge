@@ -84,19 +84,14 @@ async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) {
     console.error(error.message);
+  } else {
+    // clear cache
+    localStorage.removeItem('supabase_decks_cashe');
   }
 }
 
-async function displayDecks() {
+function renderDecksHTML(decks) {
     const decksContainer = document.getElementById('decksContainer');
-    const { data: decks, error } = await supabase
-        .from('decks')
-        .select('*');
-    if (error) {
-        console.error('Error fetching decks:', error);
-        return;
-    }
-    // avoid duplicates
     decksContainer.innerHTML = '';
 
     decks.forEach(deck => {
@@ -107,12 +102,32 @@ async function displayDecks() {
                 <p>${deck.name}</p>
                 <button class="viewDeckBtn" data-id="${deck.id}">View deck</button>
                 <button class="reviewBtn" data-id="${deck.id}">Review</button>
-                <button class="quizBtn" data-id="${deck.id}">Quiz</button>
+                </div>
             </div>
         `;
         decksContainer.appendChild(deckElement);
     });
+}
 
+async function displayDecks() {
+    // check for cached data first
+    const cachedDecks = localStorage.getItem('supabase_decks_cache');
+    if (cachedDecks) {
+        renderDecksHTML(JSON.parse(cachedDecks));
+    }
+    // fetch fresh data from supabase
+    const { data: decks, error } = await supabase
+        .from('decks')
+        .select('*');
+    if (error) {
+        console.error('Error fetching decks:', error);
+        return;
+    }
+    // only re-render if new data is different from cache
+    if (JSON.stringify(decks) !== cachedDecks) {
+        localStorage.setItem('supabase_decks_cache', JSON.stringify(decks));
+        renderDecksHTML(decks);
+    }
 }
 
 async function displayVocabCard(currentDeckId) {
@@ -133,16 +148,39 @@ async function displayVocabCard(currentDeckId) {
 
     vocabRowContainer.innerHTML = '';
     vocabs.forEach(vocab => {
-        const deckElement = document.createElement('div');
-        deckElement.className = 'container-box';
-        deckElement.innerHTML = `
-            <div class="vocab-row" id="vocabRow">
+        const rowElement = document.createElement('div');
+        rowElement.className = 'vocab-row';
+        rowElement.innerHTML = `
                 <p>${vocab.front}</p>
                 <p>${vocab.back}</p>
-            </div>
+                <div class="options" style="position: relative; display: inline-block;">
+                    <img class="icon options-trigger" id="optionsBtn" src="images/icons/threedots.png" alt="options">
+                    <div class="dropdown-content" id="dropdownContent">
+                        <a href="#" class="edit-vocab" data-id="${vocab.id}">Edit</a>
+                        <a href="#" class="delete-vocab" data-id="${vocab.id}">Delete</a>
+                    </div>
+                </div>
         `;
-        vocabRowContainer.appendChild(deckElement);
+        vocabRowContainer.appendChild(rowElement);
     });
+}
+
+async function deleteVocab(id, element) {
+    try {
+        const { error } = await supabase
+            .from('vocab')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+
+        element.style.transition = "opacity 0.3s ease";
+        element.style.opacity = "0";
+        setTimeout(() => element.remove(), 100);
+
+    } catch (err) {
+        console.error('Error deleting vocab:', err.message);
+        alert('Failed to delete the card.');
+    }
 }
 
 //==============================//
@@ -179,7 +217,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         await displayDecks();
         hideAllPages();
         homePage.style.display = 'block';
-        displayDecks();
     } else {
         hideAllPages();
         signUpPage.style.display = 'block';
@@ -297,6 +334,11 @@ document.addEventListener('DOMContentLoaded', async function () {
             .insert([newDeck])
             .select();
         console.log('Deck in supabase for', data[0]?.user_id, data);
+        if (!error && data) {
+            const cachedDecks = JSON.parse(localStorage.getItem('supabase_decks_cache'));
+            cachedDecks.push(data[0]);
+            localStorage.setItem('supabase_decks_cache', JSON.stringify(cachedDecks));
+        }
         homePage.style.display = 'block';  
     });
 
@@ -338,10 +380,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     //     });
     // });
 
+
     // Manage Cards
 
     const vocabFront = document.getElementById('vocabFront');
     const vocabBack = document.getElementById('vocabBack');
+    const vocabRowContainer = document.getElementById('vocabRowContainer');
 
     document.getElementById('addVocabBtn').addEventListener('click', () => {
         document.getElementById('vocabAddPopup').style.display = 'flex';
@@ -403,6 +447,30 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('vocabAddPopup').style.display = 'none';
         vocabFront.value = '';
         vocabBack.value = '';
+    });
+
+    vocabRowContainer.addEventListener('click', async (e) => {
+        // dropdown toggle
+        if (e.target.classList.contains('options-trigger')) {
+            const menu = e.target.parentElement.querySelector('.dropdown-content');
+
+            document.querySelectorAll('.dropdown-content').forEach(el => {
+                if (el !== menu) el.style.display = 'none';
+            });
+            const isVisible = menu.style.display == 'block';
+            menu.style.display = isVisible ? 'none' : 'block';
+
+            e.stopPropagation();
+        }
+        // delete
+        if (e.target.classList.contains('delete-vocab')) {
+            e.preventDefault();
+            const vocabId = e.target.getAttribute('data-id');
+            const confirmDelete = confirm("Are you sure you want to delete this card?");
+            if (confirmDelete) {
+                await deleteVocab(vocabId, e.target.closest('.vocab-row'));
+            }
+        }
     });
 
 }); // DOMContent loaded

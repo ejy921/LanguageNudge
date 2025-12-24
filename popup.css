@@ -200,15 +200,42 @@ input {
 .vocab-row {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    padding: 0;
+    padding-inline: 2px;
     margin: 0;
 }
 
 .vocab-row p {
     padding: 0;
 }
+
+.dropdown-content {
+    display: none;
+    background-color: white;
+    border-style: solid;
+    border-color: grey;
+    border-width: 1px;
+    position: absolute;
+    right: 55%;
+    top: 30%;
+    min-width: 40px;
+    z-index: 100;
+    border-radius: 2px;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 3px 8px;
+    display: block;
+    text-decoration: none;
+    font-size: 12px;
+}
+.dropdown-content a:hover {
+    background-color: grey;
+}
+
+
 
 
 .switch {
