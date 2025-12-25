@@ -102,6 +102,7 @@ function renderDecksHTML(decks) {
                 <p>${deck.name}</p>
                 <button class="viewDeckBtn" data-id="${deck.id}">View deck</button>
                 <button class="reviewBtn" data-id="${deck.id}">Review</button>
+                <img class="icon deleteDeckBtn" data-id="${deck.id}" src="images/icons/delete.png" alt="delete" style="width: 16px; height: 16px;">
                 </div>
             </div>
         `;
@@ -130,22 +131,20 @@ async function displayDecks() {
     }
 }
 
-async function displayVocabCard(currentDeckId) {
-    const vocabRowContainer = document.getElementById('vocabRowContainer');
-    vocabRowContainer.innerHTML = 'Loading';
+function renderTabs(decks) {
+    const tabsContainer = document.getElementById('tabsContainer');
+    if (!tabsContainer) return;
+    tabsContainer.innerHTML = '';
     
-    const { data: vocabs, error } = await supabase
-        .from('vocab')
-        .select('*')
-        .eq('deck_id', currentDeckId);
-    if (error) {
-        console.error('Error fetching vocab', error);
-        return;
-    }
+    decks.forEach(deck => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="#" class="deck-tab" data-id="${deck.id}">${deck.name}</a>`;
+        tabsContainer.appendChild(li);
+    });
+}
 
-    console.log(currentDeckId);
-    console.log(vocabs);
-
+function renderVocabHTML(vocabs) {
+    const vocabRowContainer = document.getElementById('vocabRowContainer');
     vocabRowContainer.innerHTML = '';
     vocabs.forEach(vocab => {
         const rowElement = document.createElement('div');
@@ -163,6 +162,31 @@ async function displayVocabCard(currentDeckId) {
         `;
         vocabRowContainer.appendChild(rowElement);
     });
+}
+
+async function displayVocabCard(currentDeckId) {
+    // check for cached data
+    const cachedVocabs = localStorage.getItem('vocabs_cached');
+    const cachedDecks = localStorage.getItem('supabase_decks_cache');
+    if (cachedVocabs) {
+        renderTabs(JSON.parse(cachedDecks));
+        renderVocabHTML(JSON.parse(cachedVocabs));
+    }
+    
+    const { data: vocabs, error } = await supabase
+        .from('vocab')
+        .select('*')
+        .eq('deck_id', currentDeckId);
+    if (error) {
+        console.error('Error fetching vocab', error);
+        return;
+    }
+
+    if (JSON.stringify(vocabs) !== cachedVocabs) {
+        localStorage.setItem('vocabs_cached', JSON.stringify(vocabs));
+        renderTabs(vocabs);
+        renderVocabHTML(vocabs);
+    }
 }
 
 async function deleteVocab(id, element) {
@@ -338,6 +362,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const cachedDecks = JSON.parse(localStorage.getItem('supabase_decks_cache'));
             cachedDecks.push(data[0]);
             localStorage.setItem('supabase_decks_cache', JSON.stringify(cachedDecks));
+            console.log('Cached decks:', cachedDecks);
         }
         homePage.style.display = 'block';  
     });
@@ -350,6 +375,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     document.getElementById('decksContainer').addEventListener('click', (e) => {
+        // view deck
         if (e.target.classList.contains('viewDeckBtn')) {
             const deckId = e.target.getAttribute('data-id');
             currentDeckId = deckId;
@@ -381,11 +407,27 @@ document.addEventListener('DOMContentLoaded', async function () {
     // });
 
 
-    // Manage Cards
+    // Manage Cards / Vocab Page
 
+    const tabsContainer = document.getElementById('tabsContainer');
     const vocabFront = document.getElementById('vocabFront');
     const vocabBack = document.getElementById('vocabBack');
     const vocabRowContainer = document.getElementById('vocabRowContainer');
+
+    tabsContainer.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('deck-tab')) {
+            e.preventDefault();
+            currentDeckId = e.target.getAttribute('data-id');
+            // active tab styling
+            document.querySelectorAll('.deck-tab').forEach(tab => tab.classList.remove('active'));
+            e.target.classList.add('active');
+            // switch to vocab page specific to deck
+            hideAllPages();
+            document.getElementById('vocabsPage').style.display = 'block';
+
+            await displayVocabCard(currentDeckId);
+        }
+    });
 
     document.getElementById('addVocabBtn').addEventListener('click', () => {
         document.getElementById('vocabAddPopup').style.display = 'flex';
@@ -440,6 +482,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.getElementById('vocabAddPopup').style.display = 'none';
             vocabFront.value = '';
             vocabBack.value = '';
+            const cachedVocabs = JSON.parse(localStorage.getItem('vocabs_cached'));
+            cachedVocabs.push(data[0]);
+            localStorage.setItem('vocabs_cached', JSON.stringify(cachedVocabs));
         }
     });
     
