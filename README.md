@@ -1,8 +1,20 @@
-LangNudge is a to-be Chrome extension that microdoses vocabulary during your day. Instead of countless pressing buttons in long study sessions, you get tiny, spaced-repetition-optimized nudges that show up in random intervals (which you can choose)!
+# LangNudge
+**The "In-Sight, In-Mind" Language Learning Engine.**
 
-Key Features:
-- Vocab Importing: users are able to upload their own text lists, CSV files, or Anki decks
-- Built-in Starter Decks: curated mini-decks for beginner Chinese, Spanish, French, German, Portuguese, Japanese
-- Spaced Repetition Scheduling: nudges vocabulary with an evidence-based learning system!
-- Example Sentences: we provide an example sentence at every nudge 
-- Progress Tracker: you can view how many words you went through each day!
+LangNudge is a to-be Chrome Extension that bridges the gap between passive browsing and active recall. It integrates into daily workflows via randomized browser notifications powered by a custom **SM-2 Spaced Repetition (SR) engine**.
+
+---
+
+## Key Features:
+* Import .csv files containing vocab, or use a built-in start pack
+* Spaced repetition scheduling: nudges vocabulary with an evidence-based learning system
+* AI-powered example sentences for contextual learning
+* Streak tracker to track your progress
+
+## 🛠 Tech Stack
+* JavaScript, HTML5, CSS3 with Supabase Auth and Storage (PostgreSQL)
+* OpenAI API (RAG-based contextual sentence generation)
+* Chrome Alarms API & Background Service Workers for nudges
+
+## Program Architecture
+![Picture of LangNudge program architecture](images/program_architecture.png)

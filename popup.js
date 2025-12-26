@@ -131,18 +131,6 @@ async function displayDecks() {
     }
 }
 
-function renderTabs(decks) {
-    const tabsContainer = document.getElementById('tabsContainer');
-    if (!tabsContainer) return;
-    tabsContainer.innerHTML = '';
-    
-    decks.forEach(deck => {
-        const li = document.createElement('li');
-        li.innerHTML = `<a href="#" class="deck-tab" data-id="${deck.id}">${deck.name}</a>`;
-        tabsContainer.appendChild(li);
-    });
-}
-
 function renderVocabHTML(vocabs) {
     const vocabRowContainer = document.getElementById('vocabRowContainer');
     vocabRowContainer.innerHTML = '';
@@ -169,7 +157,6 @@ async function displayVocabCard(currentDeckId) {
     const cachedVocabs = localStorage.getItem('vocabs_cached');
     const cachedDecks = localStorage.getItem('supabase_decks_cache');
     if (cachedVocabs) {
-        renderTabs(JSON.parse(cachedDecks));
         renderVocabHTML(JSON.parse(cachedVocabs));
     }
     
@@ -184,7 +171,6 @@ async function displayVocabCard(currentDeckId) {
 
     if (JSON.stringify(vocabs) !== cachedVocabs) {
         localStorage.setItem('vocabs_cached', JSON.stringify(vocabs));
-        renderTabs(vocabs);
         renderVocabHTML(vocabs);
     }
 }
@@ -409,25 +395,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Manage Cards / Vocab Page
 
-    const tabsContainer = document.getElementById('tabsContainer');
     const vocabFront = document.getElementById('vocabFront');
     const vocabBack = document.getElementById('vocabBack');
     const vocabRowContainer = document.getElementById('vocabRowContainer');
-
-    tabsContainer.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('deck-tab')) {
-            e.preventDefault();
-            currentDeckId = e.target.getAttribute('data-id');
-            // active tab styling
-            document.querySelectorAll('.deck-tab').forEach(tab => tab.classList.remove('active'));
-            e.target.classList.add('active');
-            // switch to vocab page specific to deck
-            hideAllPages();
-            document.getElementById('vocabsPage').style.display = 'block';
-
-            await displayVocabCard(currentDeckId);
-        }
-    });
 
     document.getElementById('addVocabBtn').addEventListener('click', () => {
         document.getElementById('vocabAddPopup').style.display = 'flex';
