@@ -125,8 +125,9 @@ async function displayDecks() {
         return;
     }
     // only re-render if new data is different from cache
-    if (JSON.stringify(decks) !== cachedDecks) {
-        localStorage.setItem('supabase_decks_cache', JSON.stringify(decks));
+    const freshDecks = JSON.stringify(decks);
+    if (freshDecks !== cachedDecks) {
+        localStorage.setItem('supabase_decks_cache', freshDecks);
         renderDecksHTML(decks);
     }
 }
@@ -169,23 +170,54 @@ async function displayVocabCard(currentDeckId) {
         return;
     }
 
-    if (JSON.stringify(vocabs) !== cachedVocabs) {
-        localStorage.setItem('vocabs_cached', JSON.stringify(vocabs));
+    const freshVocabs = JSON.stringify(vocabs);
+    if (freshVocabs !== cachedVocabs) {
+        localStorage.setItem('vocabs_cached', freshVocabs);
         renderVocabHTML(vocabs);
     }
 }
 
-async function deleteVocab(id, element) {
+async function deleteDeck(deckId) {
+    const confirmDelete = confirm("This will delete call cards in this deck. Are you sure?");
+    if (!confirmDelete) return;
+
     try {
         const { error } = await supabase
+            .from('decks')
+            .delete()
+            .eq('id', deckId);
+        if (error) throw error;
+        
+        await displayDecks();
+        homePage.style.display = 'block';
+    } catch (err) {
+        console.error('Error deleting deck:', err.message);
+    }
+}
+
+async function deleteVocab(id, deckId) {
+    try {
+        const { data, error } = await supabase
             .from('vocab')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .select(); // Adding select() returns the deleted row
+
         if (error) throw error;
 
-        element.style.transition = "opacity 0.3s ease";
-        element.style.opacity = "0";
-        setTimeout(() => element.remove(), 100);
+        console.log("Deleted successfully:", data);
+
+        // Update Local Storage
+        const rawCache = localStorage.getItem('vocabs_cached');
+        if (rawCache) {
+            const cachedVocabs = JSON.parse(rawCache);
+            const updatedCache = cachedVocabs.filter(v => v.id !== id);
+            localStorage.setItem('vocabs_cached', JSON.stringify(updatedCache));
+        }
+
+        if (deckId) {
+            await displayVocabCard(deckId);
+        }
 
     } catch (err) {
         console.error('Error deleting vocab:', err.message);
@@ -333,6 +365,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
         // Get rid of popup
         document.getElementById('deckAddPopup').style.display = 'none';
+
         currentDeckId = crypto.randomUUID();
         const newDeck = {
             id: currentDeckId,
@@ -343,21 +376,21 @@ document.addEventListener('DOMContentLoaded', async function () {
             .from('decks')
             .insert([newDeck])
             .select();
-        console.log('Deck in supabase for', data[0]?.user_id, data);
+            
         if (!error && data) {
-            const cachedDecks = JSON.parse(localStorage.getItem('supabase_decks_cache'));
-            cachedDecks.push(data[0]);
-            localStorage.setItem('supabase_decks_cache', JSON.stringify(cachedDecks));
-            console.log('Cached decks:', cachedDecks);
+            await displayDecks();
+            hideAllPages();
+            homePage.style.display = 'block';  
+        } else {
+            console.error('Error creating deck', error.message);
+            alert('Failed to create deck');
         }
-        homePage.style.display = 'block';  
     });
 
     document.getElementById('cancelDeckBtn').addEventListener('click', () => {
         document.getElementById('deckAddPopup').style.display = 'none';
         popupDeckName.value = '';
     });
-
 
 
     document.getElementById('decksContainer').addEventListener('click', (e) => {
@@ -370,6 +403,15 @@ document.addEventListener('DOMContentLoaded', async function () {
             vocabsPage.style.display = 'block';
             displayVocabCard(currentDeckId);
         }
+
+        if (e.target.classList.contains('deleteDeckBtn')) {
+            const deckId = e.target.getAttribute('data-id');
+            deleteDeck(deckId);
+        }
+    });
+
+    document.getElementById('deleteDeckInPage').addEventListener('click', () => {
+        deleteDeck(currentDeckId);
     });
 
     document.querySelectorAll('.uploadBtn').forEach(btn => {
@@ -444,17 +486,19 @@ document.addEventListener('DOMContentLoaded', async function () {
             .insert([newVocab])
             .select();
         console.log(newVocab);
-        if (error) {
-            console.error('Error inserting vocab:', error.message);
-            alert('Failed to save card');
-        } else {
+
+        if (!error && data) {
             console.log('Created card', data);
-            document.getElementById('vocabAddPopup').style.display = 'none';
             vocabFront.value = '';
             vocabBack.value = '';
-            const cachedVocabs = JSON.parse(localStorage.getItem('vocabs_cached'));
+            const rawCache = localStorage.getItem('vocabs_cached');
+            const cachedVocabs = rawCache ? JSON.parse(rawCache) : [];
             cachedVocabs.push(data[0]);
+            renderVocabHTML(cachedVocabs);
             localStorage.setItem('vocabs_cached', JSON.stringify(cachedVocabs));
+        } else {
+            console.error('Error inserting vocab:', error.message);
+            alert('Failed to save card');
         }
     });
     
@@ -483,7 +527,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const vocabId = e.target.getAttribute('data-id');
             const confirmDelete = confirm("Are you sure you want to delete this card?");
             if (confirmDelete) {
-                await deleteVocab(vocabId, e.target.closest('.vocab-row'));
+                await deleteVocab(vocabId, currentDeckId);
             }
         }
     });
