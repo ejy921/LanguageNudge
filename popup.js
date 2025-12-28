@@ -100,8 +100,9 @@ function renderDecksHTML(decks) {
         deckElement.innerHTML = `
             <div class="deck-row" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
                 <p>${deck.name}</p>
-                <button class="viewDeckBtn" data-id="${deck.id}">View deck</button>
-                <button class="reviewBtn" data-id="${deck.id}">Review</button>
+                <button class="viewDeckBtn" data-id="${deck.id} style="">View deck</button>
+                <button class="sub-button reviewBtn" data-id="${deck.id}">Review</button>
+                <button class="sub-button quizBtn" data-id="${deck.id}">Quiz</button>
                 <img class="icon deleteDeckBtn" data-id="${deck.id}" src="images/icons/delete.png" alt="delete" style="width: 16px; height: 16px;">
                 </div>
             </div>
@@ -160,7 +161,7 @@ async function displayVocabCard(currentDeckId) {
     if (cachedVocabs) {
         renderVocabHTML(JSON.parse(cachedVocabs));
     }
-    
+    currentDeckId = currentDeckId.trim().split(' ')[0];
     const { data: vocabs, error } = await supabase
         .from('vocab')
         .select('*')
@@ -178,9 +179,6 @@ async function displayVocabCard(currentDeckId) {
 }
 
 async function deleteDeck(deckId) {
-    const confirmDelete = confirm("This will delete call cards in this deck. Are you sure?");
-    if (!confirmDelete) return;
-
     try {
         const { error } = await supabase
             .from('decks')
@@ -212,15 +210,12 @@ async function deleteVocab(id, deckId) {
             const updatedCache = cachedVocabs.filter(v => v.id !== id);
             localStorage.setItem('vocabs_cached', JSON.stringify(updatedCache));
         }
-
         // display updated list
         if (deckId) {
             await displayVocabCard(deckId);
         }
-
     } catch (err) {
         console.error('Error deleting vocab:', err.message);
-        alert('Failed to delete the card.');
     }
 }
 
@@ -403,16 +398,22 @@ document.addEventListener('DOMContentLoaded', async function () {
         // view deck
         if (e.target.classList.contains('viewDeckBtn')) {
             const deckId = e.target.getAttribute('data-id');
-            currentDeckId = deckId;
+            currentDeckId = deckId.trim().split(' ')[0];
             hideAllPages();
-            // TODO: await displayCards()
             vocabsPage.style.display = 'block';
             displayVocabCard(currentDeckId);
         }
-
+        // delete deck
         if (e.target.classList.contains('deleteDeckBtn')) {
             const deckId = e.target.getAttribute('data-id');
-            deleteDeck(deckId);
+            document.getElementById('confirmDeleteDeckPopup').style.display = 'flex';
+            document.getElementById('confirmDeleteDeckBtn').onclick = () => {
+                document.getElementById('confirmDeleteDeckPopup').style.display = 'none';
+                deleteDeck(deckId);
+            }
+            document.getElementById('cancelDeleteDeckBtn').onclick = () => {
+                document.getElementById('confirmDeleteDeckPopup').style.display = 'none';
+            }
         }
     });
 
@@ -531,11 +532,20 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (e.target.classList.contains('delete-vocab')) {
             e.preventDefault();
             const vocabId = e.target.getAttribute('data-id');
-            const confirmDelete = confirm("Are you sure you want to delete this card?");
-            if (confirmDelete) {
-                await deleteVocab(vocabId, currentDeckId);
+            document.getElementById('confirmDeleteVocabPopup').style.display = 'flex';
+            document.getElementById('confirmDeleteVocabBtn').onclick = () => {
+                document.getElementById('confirmDeleteVocabPopup').style.display = 'none';
+                deleteVocab(vocabId, currentDeckId);
+            }   
+            document.getElementById('cancelDeleteVocabBtn').onclick = () => {
+                document.getElementById('confirmDeleteVocabPopup').style.display = 'none';
             }
         }
+        // edit
+        // if (e.target.classList.contains('edit-vocab')) {
+        //     e.preventDefault();
+        //     alert('Edit feature coming soon!');
+        // }
     });
 
 }); // DOMContent loaded
