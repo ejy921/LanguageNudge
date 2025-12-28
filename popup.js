@@ -201,13 +201,11 @@ async function deleteVocab(id, deckId) {
             .from('vocab')
             .delete()
             .eq('id', id)
-            .select(); // Adding select() returns the deleted row
-
+            .select();
         if (error) throw error;
 
         console.log("Deleted successfully:", data);
 
-        // Update Local Storage
         const rawCache = localStorage.getItem('vocabs_cached');
         if (rawCache) {
             const cachedVocabs = JSON.parse(rawCache);
@@ -215,6 +213,7 @@ async function deleteVocab(id, deckId) {
             localStorage.setItem('vocabs_cached', JSON.stringify(updatedCache));
         }
 
+        // display updated list
         if (deckId) {
             await displayVocabCard(deckId);
         }
@@ -239,6 +238,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     const flashcardPage = document.getElementById('flashcardPage');
     const quizPage = document.getElementById('quizPage');
     const signInPage = document.getElementById('signInPage');
+
+    // immediate cache render
+    const cachedDecks = localStorage.getItem('supabase_decks_cache');
+    if (cachedDecks) {
+        renderDecksHTML(JSON.parse(cachedDecks));
+        homePage.style.display = 'block';   
+    }
 
     const { data: { session }, error } = await supabase.auth.getSession();
 
