@@ -102,6 +102,11 @@ button:active {
     cursor: pointer;
 }
 
+.my-icon {
+    color: grey;
+    cursor: pointer;
+}
+
 input {
     outline: none;
     border-color: initial;

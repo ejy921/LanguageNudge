@@ -1,13 +1,16 @@
 {
   "dependencies": {
-    "@supabase/supabase-js": "^2.87.1"
+    "@supabase/supabase-js": "^2.87.1",
+    "lucide": "^0.562.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "name": "languagenudge",
   "version": "1.0.0",
   "description": "LangNudge is a to-be Chrome extension that microdoses vocabulary during your day. Instead of countless pressing buttons in long study sessions, you get tiny, spaced-repetition-optimized nudges that show up in random intervals (which you can choose)!",
   "main": "background.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "build": "esbuild popup.bundle=popup.js background.bundle=background.js --bundle --outdir=dist"
   },
   "repository": {
@@ -23,6 +26,10 @@
   },
   "homepage": "https://github.com/ejy921/LanguageNudge#readme",
   "devDependencies": {
-    "esbuild": "^0.27.1"
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "esbuild": "^0.27.1",
+    "jsdom": "^27.4.0",
+    "vitest": "^4.0.16"
   }
 }
