@@ -1,5 +1,4 @@
 // import { createClient } from '@supabase/supabase-js';
-import { createIcons, CirclePlus, Trash2 } from 'lucide';
 
 // const chromeStorageAdapter = {
 //     getItem: (key) => {
@@ -30,95 +29,95 @@ import { createIcons, CirclePlus, Trash2 } from 'lucide';
 //   }
 // );
 
-let isSigningUp = false;
+// let isSigningUp = false;
 
-createIcons({
-    icons: {
-        CirclePlus,
-        Trash2
-    }
-});
+// createIcons({
+//     icons: {
+//         CirclePlus,
+//         Trash2
+//     }
+// });
 
-// functions
+// // functions
 
-async function signUpNewUser(email, password) {
-    if (isSigningUp) return;
-    isSigningUp = true;
-    if (password.length < 6) {
-        document.getElementById('passwordTooShort').style.display = 'block';
-        isSigningUp = false;
-        return;
-    }
-    try {
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password
-        });
-        if (error) {
-            if (error.code === 'user_already_exists') {
-                document.getElementById('userAlreadyExists').style.display = 'block';
-            }
-            console.error(error);
-            return;
-        }
-        if (data?.user) {
-            console.log('Sign up success for user', data.user.id);
+// async function signUpNewUser(email, password) {
+//     if (isSigningUp) return;
+//     isSigningUp = true;
+//     if (password.length < 6) {
+//         document.getElementById('passwordTooShort').style.display = 'block';
+//         isSigningUp = false;
+//         return;
+//     }
+//     try {
+//         const { data, error } = await supabase.auth.signUp({
+//             email,
+//             password
+//         });
+//         if (error) {
+//             if (error.code === 'user_already_exists') {
+//                 document.getElementById('userAlreadyExists').style.display = 'block';
+//             }
+//             console.error(error);
+//             return;
+//         }
+//         if (data?.user) {
+//             console.log('Sign up success for user', data.user.id);
 
-            document.getElementById('signUpEmail').value = '';
-            document.getElementById('signUpPassword').value = '';
+//             document.getElementById('signUpEmail').value = '';
+//             document.getElementById('signUpPassword').value = '';
 
-            document.getElementById('signUpPage').style.display = 'none';
-            document.getElementById('signInPage').style.display = 'none';
-            document.getElementById('welcomePage').style.display = 'block';
-            return;
-        }
-    } finally {
-        isSigningUp = false;
-    }
-}
+//             document.getElementById('signUpPage').style.display = 'none';
+//             document.getElementById('signInPage').style.display = 'none';
+//             document.getElementById('welcomePage').style.display = 'block';
+//             return;
+//         }
+//     } finally {
+//         isSigningUp = false;
+//     }
+// }
 
-async function signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-        console.error(error.message);
-    } else {
-        console.log('Logged in user:', data.user);
-        document.getElementById('signInPage').style.display = 'none';
-        document.getElementById('homePage').style.display = 'block';
+// async function signIn(email, password) {
+//     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+//     if (error) {
+//         console.error(error.message);
+//     } else {
+//         console.log('Logged in user:', data.user);
+//         document.getElementById('signInPage').style.display = 'none';
+//         document.getElementById('homePage').style.display = 'block';
         
-    }
-}
+//     }
+// }
 
-async function signOut() {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error(error.message);
-  } else {
-    // clear cache
-    localStorage.removeItem('supabase_decks_cashe');
-  }
-}
+// async function signOut() {
+//   const { error } = await supabase.auth.signOut();
+//   if (error) {
+//     console.error(error.message);
+//   } else {
+//     // clear cache
+//     localStorage.removeItem('supabase_decks_cashe');
+//   }
+// }
 
-function renderDecksHTML(decks) {
-    const decksContainer = document.getElementById('decksContainer');
-    decksContainer.innerHTML = '';
+// function renderDecksHTML(decks) {
+//     const decksContainer = document.getElementById('decksContainer');
+//     decksContainer.innerHTML = '';
 
-    decks.forEach(deck => {
-        const deckElement = document.createElement('div');
-        deckElement.className = 'container-box';
-        deckElement.innerHTML = `
-            <div class="deck-row" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-                <p>${deck.name}</p>
-                <button class="viewDeckBtn" data-id="${deck.id} style="">View deck</button>
-                <button class="sub-button reviewBtn" data-id="${deck.id}">Review</button>
-                <button class="sub-button quizBtn" data-id="${deck.id}">Quiz</button>
-                <img class="icon deleteDeckBtn" data-id="${deck.id}" src="images/icons/delete.png" alt="delete" style="width: 16px; height: 16px;">
-                </div>
-            </div>
-        `;
-        decksContainer.appendChild(deckElement);
-    });
-}
+//     decks.forEach(deck => {
+//         const deckElement = document.createElement('div');
+//         deckElement.className = 'container-box';
+//         deckElement.innerHTML = `
+//             <div class="deck-row" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+//                 <p>${deck.name}</p>
+//                 <button class="viewDeckBtn" data-id="${deck.id} style="">View deck</button>
+//                 <button class="sub-button reviewBtn" data-id="${deck.id}">Review</button>
+//                 <button class="sub-button quizBtn" data-id="${deck.id}">Quiz</button>
+//                 <img class="icon deleteDeckBtn" data-id="${deck.id}" src="images/icons/delete.png" alt="delete" style="width: 16px; height: 16px;">
+//                 </div>
+//             </div>
+//         `;
+//         decksContainer.appendChild(deckElement);
+//     });
+// }
 
 async function displayDecks() {
     // check for cached data first

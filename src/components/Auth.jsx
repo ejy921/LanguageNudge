@@ -6,35 +6,60 @@ export default function Auth({ onLoginSuccess }) {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [mode, setMode] = useState('login'); // 'login' or 'signup'
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     
     const handleAuth = async (e) => {
         e.preventDefault();
+        setErrorMessage('');
+        
+        if (password.length < 6) {
+            setLoading(false);
+            setErrorMessage('Password must be at least 6 characters long.');
+            return;
+        }
+        
         setLoading(true);
 
-        let error;
+        let error, data;
         if (mode === 'signin') {
-            const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-            error = signInError;
+            const res = await supabase.auth.signInWithPassword({ email, password });
+            error = res.error;
+            data = res.data;
         } else {
-            const { error: signUpError } = await supabase.auth.signUp({ email, password });
-            error = signUpError;
+            const res = await supabase.auth.signUp({ email, password });
+            error = res.error;
+            data = res.data;
         }
-
         setLoading(false);
         if (error) {
-            alert(error.message);
+            if (mode === 'signup' && error.code === 'user_already_exists' || error.message.includes('already registered')) {
+                setErrorMessage('User already exists. Please sign in instead.');
+            } else {
+                setErrorMessage(error.message);
+            }
+            return;
         } else if (mode === 'signin') {
             onLoginSuccess();
+        } else if (data?.user) { // signup success
+            setSuccessMessage('Sign up successful! Please check your email to confirm your account.');
+            setMode('signin');
+            setEmail('');
+            setPassword('');
         }
     };
 
     return (
         <div className="auth-page">
-            <h2>{mode === 'signin' ? 'Sign In' : 'Sign Up'}</h2>
-            <form onSubmit={handleAuth}>
+            <h2>{mode === 'signin' ? 'Welcome back to LangNudge!' : 'Welcome to LangNudge!'}</h2>
+            <p style={{ fontSize: 12, marginBottom: 20 }}>Get microdoses of vocabulary during your day, with both quiz and flashcard modes.</p>
+            {errorMessage && <p style={{ color: 'red', fontSize: '9px', padding: 0, margin: 0 }}>{errorMessage}</p>}
+            {successMessage && <p style={{ color: 'green', fontSize: '9px', padding: 0, margin: 0 }}>{successMessage}</p>}
+            <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: '7px', marginBottom: '0px' }}>
                 <input
                     type="email"
                     placeholder="Email"
+                    className='text-input'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -42,16 +67,17 @@ export default function Auth({ onLoginSuccess }) {
                 <input
                     type="password"
                     placeholder="Password"
+                    className='text-input'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                 />
-                <button type="submit" disabled={loading}>
+                <button type="submit" style={{marginBottom: '0px'}} disabled={loading}>
                     {loading ? 'Loading...' : (mode === 'signin' ? 'Sign In' : 'Sign Up')}
                 </button>
             </form>
         
-            <p onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')}>
+            <p onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')} style={{display: 'flex', flexDirection: 'row', marginTop: '0px', columnGap: '3px'}}>
                 {mode === 'signin' ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
             </p>
         </div>

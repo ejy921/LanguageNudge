@@ -1,8 +1,8 @@
 // This file acts as a 'translator' for esbuild to pick up environment variables from .env and hardcode them into the final JavaScript files
 
 import { build } from 'esbuild';
-import fs from 'fs'; // file system module to read .env file
-require('dotenv').config();
+import { copyFileSync } from 'fs';
+import 'dotenv/config'; // load environment variables from .env file
 
 const config = {
   bundle: true,
@@ -14,22 +14,32 @@ const config = {
   loader: {
     '.js': 'jsx', '.png': 'file', '.css': 'copy' 
   },
+  jsx: 'automatic',
 };
 
-// Build Popup
-build({
-  ...config,
-  entryPoints: ['src/popup.jsx'],
-  outfile: 'dist/popup.js',
-}).catch(() => process.exit(1));
+async function runBuild() {
+  try {
+    await Promise.all([
+      build({
+        ...config,
+        entryPoints: ['src/popup.jsx'],
+        outfile: 'dist/popup.js',
+      }),
+      build({
+        ...config,
+        entryPoints: ['src/background.js'],
+        outfile: 'dist/background.js',
+      })
+    ]);
 
-// Build Background
-build({
-  ...config,
-  entryPoints: ['src/background.js'],
-  outfile: 'dist/background.js',
-}).catch(() => process.exit(1));
+    copyFileSync('src/popup.html', 'dist/popup.html');
+    copyFileSync('src/popup.css', 'dist/popup.css');
+    console.log('Build completed successfully.');
 
-// Copy HTML & CSS to dist
-fs.copyFileSync('src/popup.html', 'dist/popup.html');
-fs.copyFileSync('src/styles.css', 'dist/styles.css');
+  } catch (error) {
+    console.error('Build failed:', error);
+    process.exit(1);
+  }
+}
+
+runBuild();

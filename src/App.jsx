@@ -1,6 +1,6 @@
 // Determine which page to show with React State
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient'; 
 import Auth from './components/Auth';
 import Home from './components/Home';
@@ -27,7 +27,8 @@ export default function App() {
     const navigate = (page) => setCurrentPage(page);
 
     if (currentPage === 'loading') {
-        return <div>Loading...</div>;
+        // TODO: Replace with a proper loading spinner
+        return <p>Loading...</p>;
     }
 
     return (

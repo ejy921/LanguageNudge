@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@supabase/supabase-js": "^2.87.1",
-    "lucide": "^0.562.0",
+    "lucide-react": "^0.562.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
@@ -11,7 +11,7 @@
   "main": "background.js",
   "scripts": {
     "test": "vitest",
-    "build": "esbuild popup.bundle=popup.js background.bundle=background.js --bundle --outdir=dist"
+    "build": "node build.js"
   },
   "repository": {
     "type": "git",
@@ -20,7 +20,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/ejy921/LanguageNudge/issues"
   },
@@ -28,6 +28,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
+    "dotenv": "^17.2.3",
     "esbuild": "^0.27.1",
     "jsdom": "^27.4.0",
     "vitest": "^4.0.16"

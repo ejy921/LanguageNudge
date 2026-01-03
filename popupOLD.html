@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>LangNudge</title>
+    <link href="popup.css" rel="stylesheet">
+  </head>  
+  <body>
+
+    <div class="header">LangNudge
+        <img class="icon" id="homeBtn" src="images/icons/home.png" alt="home" style="position: absolute; right: 10px; top: 10px;">
+        <img class="icon" id="settingsBtn" src="images/icons/settings.png" alt="settings" style="position: absolute; right: 40px; top: 10px;">
+    </div>
+
+    <!-- <div class="signup-page" id="signUpPage">
+        <h2>Welcome to LangNudge!</h2>
+        <p style="font-size: 12px; margin-bottom: 20px;">Get microdoses of vocabulary during your day, with both quiz and flashcard modes.</p>
+        <div style="display: flex; flex-direction: column; align-items: center; row-gap: 7px; margin-bottom: 0px;">
+            <input id="signUpEmail" type="email" class="text-input" placeholder="Email">
+            <input id="signUpPassword" type="password" class="text-input" placeholder="Password">
+            <p id="passwordTooShort" style="font-size: 9px; color: red; padding: 0; margin: 0; display: none;">Password must be at least 6 characters</p>
+            <p id="userAlreadyExists" style="font-size: 9px; color: red; padding: 0; margin: 0; display: none;">There's already an account with your email. Please sign in instead.</p>
+            <button id="signUpBtn" style="margin-bottom: 0px;">Sign Up</button>
+            <div style = "display: flex; flex-direction: row; margin-top: 0px; column-gap: 3px;">
+                <p style="font-size: 10px; margin: 0;">Already have an account?</p>
+                <p style="font-size: 10px; margin: 0;">
+                    <a href="#" id="goToSignIn">Sign in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="signin-page" id="signInPage">
+        <h2>Welcome back to LangNudge!</h2>
+        <div style="display: flex; flex-direction: column; align-items: center; row-gap: 7px; margin-bottom: 0px;">
+            <input id="signInEmail" type="email" class="text-input" placeholder="Email">
+            <input id="signInPassword" type="password" class="text-input" placeholder="Password">
+            <button id="signInBtn" style="margin-bottom: 0px;">Sign In</button>
+            <div style = "display: flex; flex-direction: row; margin-top: 0px; column-gap: 3px;">
+                <p style="font-size: 10px; margin: 0;">New to LangNudge?</p>
+                <p style="font-size: 10px; margin: 0;">
+                    <a href="#" id="goToSignUp">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="welcome-page" id="welcomePage">
+        <h2>Let's get started!</h2>
+        <p>Upload your vocab file:</p>
+        <button id="uploadBtn">Upload
+            <img class="icon" src="images/icons/upload.png" alt="upload">
+        </button>
+        <p>Or try one of our curated selections!</p>
+        <button class="sub-button">Chinese</button>
+        <button class="sub-button">Spanish</button>
+        <button class="sub-button">French</button>
+        <button class="sub-button">German</button>
+        <button class="sub-button">Portuguese</button>
+        <button class="sub-button">Japanese</button>
+    </div>
+
+
+    <div class="home" id="homePage">
+        <h3 style="padding-left: 10px;">Your decks</h3>
+        
+        <!-- container for existing decks -->
+        <div class="decks-container" id="decksContainer"></div>
+        
+        <!-- new deck container -->
+        <div class="container-box" style="display: flex; flex-direction: row;border-style: dashed; justify-content: center; align-items: center;">
+            <i data-lucide="circle-plus" class="my-icon" id="addDeckBtn"></i>
+            <div class="mini-popup" id="deckAddPopup" style="display: none;">
+                <h3>Add New Deck</h3>
+                <input id="popupDeckName" type="text" placeholder="Deck name"/>
+                <div>
+                    <button id="createDeckBtn">Create</button>
+                    <button id="cancelDeckBtn" style="background-color: #b0b0b0">Cancel</button>
+                </div>
+            </div>
+            <input type="file" class="fileInput" accept=".csv,.tsv,.txt" style="display:none;">
+            <button class="uploadBtn" style="padding-top: 7px; padding-bottom: 4px;">Upload
+                <img class="icon" src="images/icons/upload.png" alt="upload" style="width: 13px; height: 13px; margin-bottom: 3px;">
+            </button>
+            <pre id="output"></pre>
+        </div>
+    </div>
+    
+
+    <div class="vocabs" id="vocabsPage">
+        <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin: 10px;">
+            <input type="text" class="text-input" placeholder="Search vocab...">
+            <p style="font-size: 10px; margin: 0; padding: 4px; border-style: solid; border-width: 1px; border-color: lightgray; border-radius: 4px;">Sort by</p>
+            <img class="icon" id="addVocabBtn" src="images/icons/add.png" alt="add" style="width: 15px; height: 15px;">
+            <img class="icon deleteDeckBtn" id="deleteDeckInPage" src="images/icons/delete.png" alt="delete" style="width: 15px; height: 15px;">
+        </div>
+        <div class="container-box" id="vocabRowContainer" style="border-width: 1px; border-color:lightgray; padding: 0; min-height: 20px;">
+            <!-- container for existing vocab -->
+            <div class="vocab-row" id="vocabRow"></div>
+        </div>
+
+        <div class="mini-popup" id="vocabSavePopup" style="display: none; width: 190px;">
+            <p style="font-size: 13px; margin: 3px;">Add new card</p>
+            <input type="hidden" id="vocabEditId"/>
+            <input id="vocabFront" type="text" label="Front" style="padding: 2px;"/>
+            <input id="vocabBack" type="text" style="padding: 2px;"/>
+            <div>
+                    <button id="saveVocabBtn" style="padding: 5px; font-size: 10px;">Save</button>
+                    <button id="cancelVocabBtn" style="background-color: #b0b0b0; padding: 5px; font-size: 10px;">Cancel</button>
+                </div>
+        </div>
+        <div class="mini-popup" id="confirmDeleteVocabPopup" style="display: none;">
+            <h3>Are you sure you want to delete this vocab?</h3>
+            <div>
+                <button id="confirmDeleteVocabBtn" style="background-color: red;">Delete</button>
+                <button id="cancelDeleteVocabBtn" style="background-color: #b0b0b0">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- confirm delete popup -->
+    <div class="mini-popup" id="confirmDeleteDeckPopup" style="display: none;">
+        <h3>Are you sure you want to delete this deck?</h3>
+        <div>
+            <button id="confirmDeleteDeckBtn" style="background-color: red;">Delete</button>
+            <button id="cancelDeleteDeckBtn" style="background-color: #b0b0b0">Cancel</button>
+        </div>
+    </div>
+
+    <div class="nudge-flashcard" id="flashcardPage">
+        <h1>il bagno</h1>
+        <button>Flip</button>
+    </div>
+
+    <div class="nudge-quiz" id="quizPage">
+        <h1>il bagno</h1>
+        <button class="sub-button">the bathroom</button>
+        <button class="sub-button">the kitchen</button>
+        <button class="sub-button">the bedroom</button>
+    </div>
+
+    <!-- <div class="settings" id="settingsPage" style="display: none;">
+        <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 10px;">
+            <div class="style-option">
+                <h4>Flashcard</h4>
+                <div class="style-box">
+                    <img class="example-img" src="images/flashcard.png" alt="flashcard">
+                </div>
+            </div>
+            <div class="style-option">
+                <h4>Quiz</h4>
+                <div class="style-box">
+                    <img class="example-img" src="images/quiz.png" alt="quiz">
+                </div>
+            </div>
+        </div>
+        <div class="container-box">
+            <div class="settings-row">
+                <p class="settings-text">Example sentences</p>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <p class="settings-text">Nudge frequency</p>
+            </div>
+        </div>
+
+        <button id="signOutBtn" style="background-color: red; padding: 8px;">Sign Out</button>
+
+    </div>
+    </div> -->
+
+    <script type="module" src="./popup.js"></script>
+
+  </body>
+</html>
