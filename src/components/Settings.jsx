@@ -1,7 +1,7 @@
 import React from 'react';
 import { supabase } from '../supabaseClient';
 
-export default function Home({ session }) {
+export default function Settings() {
 
     const handleSignOut = async () => {
         const { error } = await supabase.auth.signOut();

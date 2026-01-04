@@ -15,7 +15,7 @@ body {
 }
 
 
-.settings,
+/* .settings,
 .vocabs,
 .signup-page,
 .welcome-page,
@@ -24,7 +24,7 @@ body {
 .nudge-flashcard,
 .nudge-quiz {
   display: none;  
-}
+} */
 
 .header {
     background: #0dd6bb;
@@ -111,10 +111,10 @@ input {
     outline: none;
     border-color: initial;
     box-shadow: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 12px;
     padding: 5px;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .text-input {

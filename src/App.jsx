@@ -5,6 +5,7 @@ import { supabase } from './supabaseClient';
 import Auth from './components/Auth';
 import Home from './components/Home';
 import Settings from './components/Settings';
+import { Settings as SettingsIcon, House } from 'lucide-react';
 
 export default function App() {
     const [session, setSession] = useState(null);
@@ -32,11 +33,17 @@ export default function App() {
     }
 
     return (
-        <div className='app-container'>
-            {/* Conditional Rendering */}
-            {currentPage === 'auth' && <Auth onLoginSucces={() => navigate('home')} />}
-            {currentPage === 'home' && (<Home session={session} navigate={navigate} />)}
-            {currentPage === 'settings' && <Settings navigate={navigate} />}
+        <div>
+            <div className="header">LangNudge
+                <House onClick={() => navigate('home')} style={{position: 'absolute', right: '10px', top: '10px'}}/>
+                <SettingsIcon onClick={() => navigate('settings')} style={{position: 'absolute', right: '40px', top: '10px'}}/>
+            </div>
+            <div className='app-container'>
+                {/* Conditional Rendering */}
+                {currentPage === 'auth' && <Auth onLoginSuccess={() => navigate('home')} />}
+                {currentPage === 'home' && (<Home session={session} navigate={navigate} />)}
+                {currentPage === 'settings' && <Settings navigate={navigate} />}
+            </div>
         </div>
     );
 }

@@ -7,34 +7,40 @@ export default function Home({ session }) {
     const [showCreateDeckPopup, setShowCreateDeckPopup] = useState(false);
 
     useEffect(() => {
-        fetchDecks();
-    }, []);
+        // define the function inside effect to avoid dependency issues
+        async function fetchDecks() {
+            const cachedDecks = localStorage.getItem('supabase_decks_cache');
+            if (cachedDecks) {
+                const parsed = JSON.parse(cachedDecks);
+                if (Array.isArray(parsed)) {
+                    setDecks(parsed);
+                }
+            }
 
-    async function fetchDecks() {
-        console.log('Fetching decks for session:', session);
-        const cachedDecks = localStorage.getItem('supabase_decks_cache');
-        if (cachedDecks) {
-            setDecks(JSON.parse(cachedDecks));
-        }
-        // ensure session and user ID exist
-        if (!session?.user?.id) return;
-        // fetch decks from supabase
-        const { data, error } = await supabase
-            .from('decks')
-            .select('*')
-            .eq('user_id', session.user.id);
+            if (!session?.user?.id) return;
 
-        if (error) {
-            console.error('Error fetching decks:', error);
-        } else {
-            console.log('Fetched decks from Supabase:', data);
-            const cachedDeckStr = JSON.stringify(data);
-            if (cachedDeckStr !== cachedDecks) {
-                setDecks(data || []);
-                localStorage.setItem('supabase_decks_cache', cachedDeckStr);
+            console.log('Fetching fresh decks from Supabase...');
+            const { data, error } = await supabase
+                .from('decks')
+                .select('*')
+                .eq('user_id', session.user.id);
+
+            if (error) {
+                console.error('Error fetching decks:', error);
+            } else {
+                const validData = data || [];
+                // prevent unnecessary re-renders
+                if (JSON.stringify(validData) !== cachedDecks) {
+                    setDecks(validData);
+                    localStorage.setItem('supabase_decks_cache', JSON.stringify(validData));
+                }
             }
         }
-    };
+
+        fetchDecks();
+
+    // re-run whenever session ID changes
+    }, [session?.user?.id]);
 
     const handleAddDeck = async (e) => {
         e.preventDefault();
@@ -51,6 +57,7 @@ export default function Home({ session }) {
 
     return (
         <div className='home'>
+            {console.log("Rendering Home Component. Decks:", decks)}
             <h3 style={{paddingLeft: '10px'}}>Your decks</h3>
             <div className='decks-container'>
                 {decks.length === 0 && <p>No decks yet.</p>}
