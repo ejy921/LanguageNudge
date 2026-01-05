@@ -119,71 +119,71 @@
 //     });
 // }
 
-async function displayDecks() {
-    // check for cached data first
-    const cachedDecks = localStorage.getItem('supabase_decks_cache');
-    if (cachedDecks) {
-        renderDecksHTML(JSON.parse(cachedDecks));
-    }
-    // fetch fresh data from supabase
-    const { data: decks, error } = await supabase
-        .from('decks')
-        .select('*');
-    if (error) {
-        console.error('Error fetching decks:', error);
-        return;
-    }
-    // only re-render if new data is different from cache
-    const freshDecks = JSON.stringify(decks);
-    if (freshDecks !== cachedDecks) {
-        localStorage.setItem('supabase_decks_cache', freshDecks);
-        renderDecksHTML(decks);
-    }
-}
+// async function displayDecks() {
+//     // check for cached data first
+//     const cachedDecks = localStorage.getItem('supabase_decks_cache');
+//     if (cachedDecks) {
+//         renderDecksHTML(JSON.parse(cachedDecks));
+//     }
+//     // fetch fresh data from supabase
+//     const { data: decks, error } = await supabase
+//         .from('decks')
+//         .select('*');
+//     if (error) {
+//         console.error('Error fetching decks:', error);
+//         return;
+//     }
+//     // only re-render if new data is different from cache
+//     const freshDecks = JSON.stringify(decks);
+//     if (freshDecks !== cachedDecks) {
+//         localStorage.setItem('supabase_decks_cache', freshDecks);
+//         renderDecksHTML(decks);
+//     }
+// }
 
-function renderVocabHTML(vocabs) {
-    const vocabRowContainer = document.getElementById('vocabRowContainer');
-    vocabRowContainer.innerHTML = '';
-    vocabs.forEach(vocab => {
-        const rowElement = document.createElement('div');
-        rowElement.className = 'vocab-row';
-        rowElement.innerHTML = `
-                <p>${vocab.front}</p>
-                <p>${vocab.back}</p>
-                <div class="options" style="position: relative; display: inline-block;">
-                    <img class="icon options-trigger" id="optionsBtn" src="images/icons/threedots.png" alt="options">
-                    <div class="dropdown-content" id="dropdownContent">
-                        <a href="#" class="edit-vocab" data-id="${vocab.id}">Edit</a>
-                        <a href="#" class="delete-vocab" data-id="${vocab.id}">Delete</a>
-                    </div>
-                </div>
-        `;
-        vocabRowContainer.appendChild(rowElement);
-    });
-}
+// function renderVocabHTML(vocabs) {
+//     const vocabRowContainer = document.getElementById('vocabRowContainer');
+//     vocabRowContainer.innerHTML = '';
+//     vocabs.forEach(vocab => {
+//         const rowElement = document.createElement('div');
+//         rowElement.className = 'vocab-row';
+//         rowElement.innerHTML = `
+//                 <p>${vocab.front}</p>
+//                 <p>${vocab.back}</p>
+//                 <div class="options" style="position: relative; display: inline-block;">
+//                     <img class="icon options-trigger" id="optionsBtn" src="images/icons/threedots.png" alt="options">
+//                     <div class="dropdown-content" id="dropdownContent">
+//                         <a href="#" class="edit-vocab" data-id="${vocab.id}">Edit</a>
+//                         <a href="#" class="delete-vocab" data-id="${vocab.id}">Delete</a>
+//                     </div>
+//                 </div>
+//         `;
+//         vocabRowContainer.appendChild(rowElement);
+//     });
+// }
 
-async function displayVocabCard(currentDeckId) {
-    // check for cached data
-    const cachedVocabs = localStorage.getItem('vocabs_cached');
-    if (cachedVocabs) {
-        renderVocabHTML(JSON.parse(cachedVocabs));
-    }
-    currentDeckId = currentDeckId.trim().split(' ')[0];
-    const { data: vocabs, error } = await supabase
-        .from('vocab')
-        .select('*')
-        .eq('deck_id', currentDeckId);
-    if (error) {
-        console.error('Error fetching vocab', error);
-        return;
-    }
+// async function displayVocabCard(currentDeckId) {
+//     // check for cached data
+//     const cachedVocabs = localStorage.getItem('vocabs_cached');
+//     if (cachedVocabs) {
+//         renderVocabHTML(JSON.parse(cachedVocabs));
+//     }
+//     currentDeckId = currentDeckId.trim().split(' ')[0];
+//     const { data: vocabs, error } = await supabase
+//         .from('vocab')
+//         .select('*')
+//         .eq('deck_id', currentDeckId);
+//     if (error) {
+//         console.error('Error fetching vocab', error);
+//         return;
+//     }
 
-    const freshVocabs = JSON.stringify(vocabs);
-    if (freshVocabs !== cachedVocabs) {
-        localStorage.setItem('vocabs_cached', freshVocabs);
-        renderVocabHTML(vocabs);
-    }
-}
+//     const freshVocabs = JSON.stringify(vocabs);
+//     if (freshVocabs !== cachedVocabs) {
+//         localStorage.setItem('vocabs_cached', freshVocabs);
+//         renderVocabHTML(vocabs);
+//     }
+// }
 
 async function createVocab(front, back, deckId) {
     try {
@@ -297,75 +297,75 @@ document.addEventListener('DOMContentLoaded', async function () {
     const quizPage = document.getElementById('quizPage');
     const signInPage = document.getElementById('signInPage');
 
-    // immediate cache render
-    const cachedDecks = localStorage.getItem('supabase_decks_cache');
-    if (cachedDecks) {
-        renderDecksHTML(JSON.parse(cachedDecks));
-        homePage.style.display = 'block';   
-    }
+    // // immediate cache render
+    // const cachedDecks = localStorage.getItem('supabase_decks_cache');
+    // if (cachedDecks) {
+    //     renderDecksHTML(JSON.parse(cachedDecks));
+    //     homePage.style.display = 'block';   
+    // }
 
-    const { data: { session }, error } = await supabase.auth.getSession();
+    // const { data: { session }, error } = await supabase.auth.getSession();
 
-    // Screen changes
+    // // Screen changes
     
-    function hideAllPages() {
-        homePage.style.display = 'none';
-        settingsPage.style.display = 'none';
-        vocabsPage.style.display = 'none';
-        flashcardPage.style.display = 'none';
-        quizPage.style.display = 'none';
-        welcomePage.style.display = 'none';
-        signUpPage.style.display = 'none';
-        signInPage.style.display = 'none';
-    }
+    // function hideAllPages() {
+    //     homePage.style.display = 'none';
+    //     settingsPage.style.display = 'none';
+    //     vocabsPage.style.display = 'none';
+    //     flashcardPage.style.display = 'none';
+    //     quizPage.style.display = 'none';
+    //     welcomePage.style.display = 'none';
+    //     signUpPage.style.display = 'none';
+    //     signInPage.style.display = 'none';
+    // }
 
-    if (session) {
-        await displayDecks();
-        hideAllPages();
-        homePage.style.display = 'block';
-    } else {
-        hideAllPages();
-        signUpPage.style.display = 'block';
-        document.getElementById('signUpEmail').focus();
-    }
+    // if (session) {
+    //     await displayDecks();
+    //     hideAllPages();
+    //     homePage.style.display = 'block';
+    // } else {
+    //     hideAllPages();
+    //     signUpPage.style.display = 'block';
+    //     document.getElementById('signUpEmail').focus();
+    // }
 
-    document.getElementById('homeBtn').addEventListener('click', () => {
-        if (session) {
-            hideAllPages();
-            homePage.style.display = 'block';
-        }
-    });
+    // document.getElementById('homeBtn').addEventListener('click', () => {
+    //     if (session) {
+    //         hideAllPages();
+    //         homePage.style.display = 'block';
+    //     }
+    // });
 
-    document.getElementById('settingsBtn').addEventListener('click', () => {
-        if (session) {
-            hideAllPages();
-            settingsPage.style.display = 'block';
-        }
-    });
+    // document.getElementById('settingsBtn').addEventListener('click', () => {
+    //     if (session) {
+    //         hideAllPages();
+    //         settingsPage.style.display = 'block';
+    //     }
+    // });
 
 
     // Authentication
 
-    const signUpBtn = document.getElementById('signUpBtn');
-    const signInBtn = document.getElementById('signInBtn');
+    // const signUpBtn = document.getElementById('signUpBtn');
+    // const signInBtn = document.getElementById('signInBtn');
 
-    signUpBtn.onclick = async () => {
-        const emailInput = document.getElementById('signUpEmail');
-        const passwordInput = document.getElementById('signUpPassword');
+    // signUpBtn.onclick = async () => {
+    //     const emailInput = document.getElementById('signUpEmail');
+    //     const passwordInput = document.getElementById('signUpPassword');
 
-        // disable button to prevent double-clicks
-        signUpBtn.disabled = true;
+    //     // disable button to prevent double-clicks
+    //     signUpBtn.disabled = true;
 
-        await signUpNewUser(emailInput.value, passwordInput.value);
-        // re-enable button 
-        signUpBtn.disabled = false;
-    }
+    //     await signUpNewUser(emailInput.value, passwordInput.value);
+    //     // re-enable button 
+    //     signUpBtn.disabled = false;
+    // }
     
-    document.getElementById('signUpPassword').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            document.getElementById('signUpBtn').click();
-        }
-    });
+    // document.getElementById('signUpPassword').addEventListener('keypress', (e) => {
+    //     if (e.key === 'Enter') {
+    //         document.getElementById('signUpBtn').click();
+    //     }
+    // });
 
     signInBtn.onclick = async () => {
         const emailInput = document.getElementById('signInEmail');
@@ -382,19 +382,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-    document.getElementById('goToSignIn').addEventListener('click', (e) => {
-        e.preventDefault();
-        hideAllPages();
-        signInPage.style.display = 'block';
-        document.getElementById('signInEmail').focus();
-    });
+    // document.getElementById('goToSignIn').addEventListener('click', (e) => {
+    //     e.preventDefault();
+    //     hideAllPages();
+    //     signInPage.style.display = 'block';
+    //     document.getElementById('signInEmail').focus();
+    // });
 
-    document.getElementById('goToSignUp').addEventListener('click', (e) => {
-        e.preventDefault();
-        hideAllPages();
-        signUpPage.style.display = 'block';
-        document.getElementById('signInEmail').focus();
-    });
+    // document.getElementById('goToSignUp').addEventListener('click', (e) => {
+    //     e.preventDefault();
+    //     hideAllPages();
+    //     signUpPage.style.display = 'block';
+    //     document.getElementById('signInEmail').focus();
+    // });
 
     document.getElementById('signOutBtn').addEventListener('click', async () => {
         console.log('Attempt to sign out');

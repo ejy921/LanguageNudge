@@ -105,6 +105,8 @@ button:active {
 .my-icon {
     color: grey;
     cursor: pointer;
+    height: 18px;
+    width: 18px;
 }
 
 input {
