@@ -5,6 +5,7 @@ import { CirclePlus, Trash2 } from 'lucide-react';
 export default function Home({ session, navigate }) {
     const [decks, setDecks] = useState([]);
     const [showCreateDeckPopup, setShowCreateDeckPopup] = useState(false);
+    const [showDeleteDeckPopup, setShowDeleteDeckPopup] = useState(false);
 
     useEffect(() => {
         // define the function inside effect to avoid dependency issues
@@ -42,17 +43,49 @@ export default function Home({ session, navigate }) {
     };
 
     const handleAddDeck = async (e) => {
+        // stop page reload when from is submitted
         e.preventDefault();
+
+        const deckName = e.target.deckName.value;
+        if (!deckName) {
+            alert('Please enter a deck name');
+            return;
+        }
+
+        const { data: { user }, error: userError} = await supabase.auth.getUser();
+        if (userError || !user) {
+            console.error('No user logged in');
+            return;
+        }
+        
+        const currentDeckId = crypto.randomUUID();
+        const newDeck = {
+            id: currentDeckId,
+            name: deckName,
+            user_id: user.id
+        };
+        const { data, error } = await supabase
+            .from('decks')
+            .insert([newDeck])
+            .select();
+        
+        if (!error && data) {
+            setDecks(prev => [...prev, data[0]]);
+            setShowCreateDeckPopup(false);
+        } else {
+            console.error('Error creating deck', error.message);
+        }
+
     };
 
-    // const handleDeleteDeck = async (deckId) => {
-    //     setDecks(decks.filter(deck => deck.id !== deckId)); // optimistic UI update
-    //     const { error } = await supabase.from('decks').delete().eq('id', deckId);
-    //     if (error) {
-    //         console.error('Error deleting deck:', error);
-    //         fetchDecks(); // revert UI on error
-    //     }
-    // };
+    const handleDeleteDeck = async (deckId) => {
+        setDecks(decks.filter(deck => deck.id !== deckId)); // optimistic UI update
+        const { error } = await supabase.from('decks').delete().eq('id', deckId);
+        if (error) {
+            console.error('Error deleting deck:', error);
+            fetchDecks(); // revert UI on error
+        }
+    };
 
     return (
         <div className='home'>
@@ -81,7 +114,7 @@ export default function Home({ session, navigate }) {
                     <div className='mini-popup'>
                         <h3>Create New Deck</h3>
                         <form onSubmit={handleAddDeck}>
-                            <input type='text' placeholder='Deck Name' required />
+                            <input type='text' name='deckName' placeholder='Deck Name' required />
                             <div>
                                 <button type='submit'>Create</button>
                                 <button type='button' onClick={() => setShowCreateDeckPopup(false)} style={{backgroundColor: '#b0b0b0'}}>Cancel</button>

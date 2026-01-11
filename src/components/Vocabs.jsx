@@ -8,8 +8,8 @@ export default function Vocabs({ deckId, navigate }) {
     const [formData, setFormData] = useState({ front: '', back: '' });
 
     const [activeMenuId, setActiveMenuId] = useState(null);
-    const [deletingVocabPopup, setDeletingVocabPopup] = useState(null);
-    const [editingVocabPopup, setEditingVocabPopup] = useState(null);
+    const [activeSortbyId, setActiveSortbyId] = useState(null);
+    const [sortBy, setSortBy] = useState('oldest'); // 'name', 'newest', 'oldest'
 
     useEffect(() => {
         fetchVocabs(deckId);
@@ -23,7 +23,13 @@ export default function Vocabs({ deckId, navigate }) {
 
     const toggleMenu = (e, vocabId) => {
         e.stopPropagation();
+        // if already open, close; if not, open menu
         setActiveMenuId(prev => prev === vocabId? null : vocabId);
+    }
+
+    const toggleSortbyMenu = (e) => {
+        e.stopPropagation();
+        setActiveSortbyId(prev => prev === deckId ? null : deckId);
     }
 
     async function fetchVocabs() {
@@ -130,7 +136,7 @@ export default function Vocabs({ deckId, navigate }) {
             console.error('Error updating card:', error);
             alert('Failed to update card');
         } else {
-            if (data) {
+            if (data && data.length > 0) {
                 const updatedVocabs = vocabs.map(vocab => vocab.id === popup.card.id ? data[0] : vocab);
                 setVocabs(updatedVocabs);
                 localStorage.setItem(`supabase_vocabs_cache_${deckId}`, JSON.stringify(updatedVocabs));
@@ -139,29 +145,68 @@ export default function Vocabs({ deckId, navigate }) {
         }
     } 
 
+    const sortedVocabs = [...vocabs].sort((a, b) => {
+        if (sortBy === 'name') {
+            return a.front.localeCompare(b.front);
+        } else if (sortBy === 'newest') {
+            return new Date(b.created_at) - new Date(a.created_at);
+        } else if (sortBy === 'oldest') {
+            return new Date(a.created_at) - new Date(b.created_at);
+        }
+        return 0;
+    })
+
     return (
         <div className='vocabs' style={{display: 'flex', flexDirection: 'column'}}>
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', margin: '7px', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', margin: '10px 0px', gap: '12px' }}>
                 <input type='text' className='text-input' placeholder='Search vocab...' />
-                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: '5px', cursor: 'pointer', borderStyle: 'solid', borderWidth: '1px', borderColor: 'lightgray', borderRadius: '4px', padding: '2px' }}>
+                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: '0px', cursor: 'pointer', borderStyle: 'solid', borderWidth: '1px', borderColor: 'lightgray', borderRadius: '4px', padding: '2px', minWidth: '50px' }}>
                     <p style={{ fontSize: '8px', margin: 0}}>Sort by</p>
-                    <ChevronDown className='my-icon' />
+                    <ChevronDown className='my-icon' onClick={(e) => toggleSortbyMenu(e)}/>
+                    {activeSortbyId === deckId && (
+                        <div className='dropdown-content' style={{alignItems: 'stretch', textAlign: 'left', right: '60px', top: '90px'}}>
+                            <p onClick={(e) => {
+                                setSortBy('name');
+                                setActiveSortbyId(null);
+                            }}>Name</p>
+                            <p onClick={(e) => {
+                                setSortBy('newest');
+                                setActiveSortbyId(null);
+                            }}>Newest</p>
+                            <p onClick={(e) => {
+                                setSortBy('oldest');
+                                setActiveSortbyId(null);
+                            }}>Oldest</p>
+                        </div>
+                    )}
                 </div>
                 <CirclePlus onClick={() => openAddCardPopup()} className='my-icon' />
                 <Trash2 className='my-icon' />
             </div>
 
             <div className='container-box' style={{ borderWidth: '1px', borderColor: 'lightgray', padding: 0, minHeight: '20px', minWidth: '90%' }}>
-                {vocabs.map(vocab => (
+                {sortedVocabs.map(vocab => (
                     <div className='vocab-row' key={vocab.id}> 
                         <span>{vocab.front}</span>
                         <span>{vocab.back}</span>
                         <div className='options' style={{ position: 'relative', display: 'inline-block' }}>
-                            <EllipsisVertical className='my-icon' />
-                            <div className='dropdown-content options-trigger'>
-                                <p onClick={() => openEditCardPopup(vocab)}>Edit</p>
-                                <p onClick={() => openDeleteCardPopup(vocab)}>Delete</p>
-                            </div>
+                            <EllipsisVertical className='my-icon' onClick={(e) => toggleMenu(e, vocab.id)}/>
+                            {activeMenuId === vocab.id && (
+                                <div className='dropdown-content'>
+                                    <p onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveMenuId(null);
+                                        openEditCardPopup(vocab);}}>
+                                        Edit
+                                    </p>
+                                    <p onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveMenuId(null);
+                                        openEditCardPopup(vocab);}}>
+                                        Delete
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}
