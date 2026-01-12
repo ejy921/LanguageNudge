@@ -15,7 +15,7 @@ body {
 }
 
 
-.settings,
+/* .settings,
 .vocabs,
 .signup-page,
 .welcome-page,
@@ -24,7 +24,7 @@ body {
 .nudge-flashcard,
 .nudge-quiz {
   display: none;  
-}
+} */
 
 .header {
     background: #0dd6bb;
@@ -102,14 +102,21 @@ button:active {
     cursor: pointer;
 }
 
+.my-icon {
+    color: grey;
+    cursor: pointer;
+    height: 18px;
+    width: 18px;
+}
+
 input {
     outline: none;
     border-color: initial;
     box-shadow: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 12px;
     padding: 5px;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .text-input {
@@ -205,15 +212,14 @@ input {
     justify-content: space-between;
     align-items: center;
     padding-inline: 2px;
-    margin: 0;
+    padding-top: 4px;
 }
 
 .vocab-row p {
-    padding: 0;
+    font-size: 10px;
 }
 
 .dropdown-content {
-    display: none;
     background-color: white;
     border-style: solid;
     border-color: grey;
@@ -226,14 +232,15 @@ input {
     border-radius: 2px;
 }
 
-.dropdown-content a {
+.dropdown-content p {
     color: black;
+    margin: 0;
     padding: 3px 8px;
     display: block;
     text-decoration: none;
-    font-size: 12px;
+    font-size: 11px;
 }
-.dropdown-content a:hover {
+.dropdown-content p:hover {
     background-color: grey;
 }
 
