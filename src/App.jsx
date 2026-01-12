@@ -1,6 +1,6 @@
 // Determine which page to show with React State
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient'; 
 import Auth from './components/Auth';
 import Home from './components/Home';

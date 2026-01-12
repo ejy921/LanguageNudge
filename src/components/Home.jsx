@@ -38,14 +38,9 @@ export default function Home({ session, navigate }) {
     // re-run whenever session ID changes
     }, [session?.user?.id]);
 
-    const handleViewDeck = (deckId) => {
-        navigate('vocabs', deckId);
-    };
-
     const handleAddDeck = async (e) => {
         // stop page reload when from is submitted
         e.preventDefault();
-
         const deckName = e.target.deckName.value;
         if (!deckName) {
             alert('Please enter a deck name');
@@ -53,37 +48,35 @@ export default function Home({ session, navigate }) {
         }
 
         const { data: { user }, error: userError} = await supabase.auth.getUser();
-        if (userError || !user) {
-            console.error('No user logged in');
-            return;
-        }
         
         const currentDeckId = crypto.randomUUID();
-        const newDeck = {
-            id: currentDeckId,
-            name: deckName,
-            user_id: user.id
-        };
+        const newDeck = {id: currentDeckId, name: deckName, user_id: user.id};
         const { data, error } = await supabase
             .from('decks')
             .insert([newDeck])
             .select();
-        
         if (!error && data) {
             setDecks(prev => [...prev, data[0]]);
             setShowCreateDeckPopup(false);
         } else {
             console.error('Error creating deck', error.message);
         }
-
     };
 
-    const handleDeleteDeck = async (deckId) => {
-        setDecks(decks.filter(deck => deck.id !== deckId)); // optimistic UI update
-        const { error } = await supabase.from('decks').delete().eq('id', deckId);
+    const handleDeleteDeck = async (id) => {
+        const updatedDecks = decks.filter(deck => deck.id !== id);
+        setDecks(updatedDecks); // optimistic UI update
+
+        const { error } = await supabase
+            .from('decks')
+            .delete().
+            eq('id', id);
+
         if (error) {
             console.error('Error deleting deck:', error);
-            fetchDecks(); // revert UI on error
+        } else {
+            localStorage.setItem(`supabase_decks_cache_${id}`, JSON.stringify(updatedDecks));
+            setShowDeleteDeckPopup(false);
         }
     };
 
@@ -98,19 +91,27 @@ export default function Home({ session, navigate }) {
                     <div key={deck.id} className='container-box'>
                         <div className='deck-row' style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                             <span>{deck.name}</span>
-                            <button className='viewDeckBtn' onClick={() => handleViewDeck(deck.id)}>View deck</button>
+                            <button className='viewDeckBtn' onClick={() => navigate('vocabs', deck.id)}>View deck</button>
                             <button className='sub-button'>Review</button>
                             <button className='sub-button'>Quiz</button>
-                            <Trash2 className='my-icon' onClick={() => handleDeleteDeck(deck.id)}/>
+                            <Trash2 className='my-icon' onClick={() => setShowDeleteDeckPopup(true)}/>
+                            {showDeleteDeckPopup && (
+                                <div className='mini-popup'>
+                                    <h5>Are you sure you want to delete this deck? All cards inside will be deleted alongside.</h5>
+                                    <div>
+                                        <button onClick={() => handleDeleteDeck(deck.id)} style={{backgroundColor: 'red'}}>Delete</button>
+                                        <button onClick={() => setShowDeleteDeckPopup(false)} style={{backgroundColor: '#b0b0b0'}}>Cancel</button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}
             </div>
             
             <div className='container-box' style={{display: 'flex', flexDirection: 'row', borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center'}}>
-                {!showCreateDeckPopup ? (
-                    <CirclePlus className='my-icon' onClick={() => setShowCreateDeckPopup(true)}/>
-                ) : (
+                <CirclePlus className='my-icon' onClick={() => setShowCreateDeckPopup(true)}/>
+                {showCreateDeckPopup && (
                     <div className='mini-popup'>
                         <h3>Create New Deck</h3>
                         <form onSubmit={handleAddDeck}>

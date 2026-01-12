@@ -38,7 +38,7 @@ export default function Settings() {
                     <p className='settings-text'>Nudge frequency</p>
                 </div>
             </div>
-            <button style={{ backgroundColor: 'red', padding: '8px' }}>Sign Out</button>
+            <button onClick={handleSignOut} style={{ backgroundColor: 'red', padding: '8px' }}>Sign Out</button>
         </div>
     )
 }

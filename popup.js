@@ -215,46 +215,46 @@
 //     }
 // }
 
-async function deleteDeck(deckId) {
-    try {
-        const { error } = await supabase
-            .from('decks')
-            .delete()
-            .eq('id', deckId);
-        if (error) throw error;
+// async function deleteDeck(deckId) {
+//     try {
+//         const { error } = await supabase
+//             .from('decks')
+//             .delete()
+//             .eq('id', deckId);
+//         if (error) throw error;
         
-        await displayDecks();
-        homePage.style.display = 'block';
-    } catch (err) {
-        console.error('Error deleting deck:', err.message);
-    }
-}
+//         await displayDecks();
+//         homePage.style.display = 'block';
+//     } catch (err) {
+//         console.error('Error deleting deck:', err.message);
+//     }
+// }
 
-async function deleteVocab(id, deckId) {
-    try {
-        const { data, error } = await supabase
-            .from('vocab')
-            .delete()
-            .eq('id', id)
-            .select();
-        if (error) throw error;
+// async function deleteVocab(id, deckId) {
+//     try {
+//         const { data, error } = await supabase
+//             .from('vocab')
+//             .delete()
+//             .eq('id', id)
+//             .select();
+//         if (error) throw error;
 
-        console.log("Deleted successfully:", data);
+//         console.log("Deleted successfully:", data);
 
-        const rawCache = localStorage.getItem('vocabs_cached');
-        if (rawCache) {
-            const cachedVocabs = JSON.parse(rawCache);
-            const updatedCache = cachedVocabs.filter(v => v.id !== id);
-            localStorage.setItem('vocabs_cached', JSON.stringify(updatedCache));
-        }
-        // display updated list
-        if (deckId) {
-            await displayVocabCard(deckId);
-        }
-    } catch (err) {
-        console.error('Error deleting vocab:', err.message);
-    }
-}
+//         const rawCache = localStorage.getItem('vocabs_cached');
+//         if (rawCache) {
+//             const cachedVocabs = JSON.parse(rawCache);
+//             const updatedCache = cachedVocabs.filter(v => v.id !== id);
+//             localStorage.setItem('vocabs_cached', JSON.stringify(updatedCache));
+//         }
+//         // display updated list
+//         if (deckId) {
+//             await displayVocabCard(deckId);
+//         }
+//     } catch (err) {
+//         console.error('Error deleting vocab:', err.message);
+//     }
+// }
 
 // async function editVocab(id, front, back, deckId) {
 //     try {
@@ -367,20 +367,20 @@ document.addEventListener('DOMContentLoaded', async function () {
     //     }
     // });
 
-    signInBtn.onclick = async () => {
-        const emailInput = document.getElementById('signInEmail');
-        const passwordInput = document.getElementById('signInPassword');
+    // signInBtn.onclick = async () => {
+    //     const emailInput = document.getElementById('signInEmail');
+    //     const passwordInput = document.getElementById('signInPassword');
 
-        signInBtn.disabled = true;
-        await signIn(emailInput.value, passwordInput.value);
-        signInBtn.disabled = false;
-    }
+    //     signInBtn.disabled = true;
+    //     await signIn(emailInput.value, passwordInput.value);
+    //     signInBtn.disabled = false;
+    // }
 
-    document.getElementById('signInPassword').addEventListener('keypress', (e) => {
-        if (e.key == 'Enter') {
-            document.getElementById('signInBtn').click();
-        }
-    });
+    // document.getElementById('signInPassword').addEventListener('keypress', (e) => {
+    //     if (e.key == 'Enter') {
+    //         document.getElementById('signInBtn').click();
+    //     }
+    // });
 
     // document.getElementById('goToSignIn').addEventListener('click', (e) => {
     //     e.preventDefault();
@@ -396,12 +396,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     //     document.getElementById('signInEmail').focus();
     // });
 
-    document.getElementById('signOutBtn').addEventListener('click', async () => {
-        console.log('Attempt to sign out');
-        await signOut();
-        hideAllPages();
-        signInPage.style.display = 'block';
-    });
+    // document.getElementById('signOutBtn').addEventListener('click', async () => {
+    //     console.log('Attempt to sign out');
+    //     await signOut();
+    //     hideAllPages();
+    //     signInPage.style.display = 'block';
+    // });
 
 
     // Manage Decks
@@ -451,38 +451,38 @@ document.addEventListener('DOMContentLoaded', async function () {
     //     }
     // });
 
-    document.getElementById('cancelDeckBtn').addEventListener('click', () => {
-        document.getElementById('deckAddPopup').style.display = 'none';
-        popupDeckName.value = '';
-    });
+    // document.getElementById('cancelDeckBtn').addEventListener('click', () => {
+    //     document.getElementById('deckAddPopup').style.display = 'none';
+    //     popupDeckName.value = '';
+    // });
 
 
-    document.getElementById('decksContainer').addEventListener('click', (e) => {
-        // view deck
-        if (e.target.classList.contains('viewDeckBtn')) {
-            const deckId = e.target.getAttribute('data-id');
-            currentDeckId = deckId.trim().split(' ')[0];
-            hideAllPages();
-            vocabsPage.style.display = 'block';
-            displayVocabCard(currentDeckId);
-        }
-        // delete deck
-        if (e.target.classList.contains('deleteDeckBtn')) {
-            const deckId = e.target.getAttribute('data-id');
-            document.getElementById('confirmDeleteDeckPopup').style.display = 'flex';
-            document.getElementById('confirmDeleteDeckBtn').onclick = () => {
-                document.getElementById('confirmDeleteDeckPopup').style.display = 'none';
-                deleteDeck(deckId);
-            }
-            document.getElementById('cancelDeleteDeckBtn').onclick = () => {
-                document.getElementById('confirmDeleteDeckPopup').style.display = 'none';
-            }
-        }
-    });
+    // document.getElementById('decksContainer').addEventListener('click', (e) => {
+    //     view deck
+    //     if (e.target.classList.contains('viewDeckBtn')) {
+    //         const deckId = e.target.getAttribute('data-id');
+    //         currentDeckId = deckId.trim().split(' ')[0];
+    //         hideAllPages();
+    //         vocabsPage.style.display = 'block';
+    //         displayVocabCard(currentDeckId);
+    //     }
+    //     delete deck
+    //     if (e.target.classList.contains('deleteDeckBtn')) {
+    //         const deckId = e.target.getAttribute('data-id');
+    //         document.getElementById('confirmDeleteDeckPopup').style.display = 'flex';
+    //         document.getElementById('confirmDeleteDeckBtn').onclick = () => {
+    //             document.getElementById('confirmDeleteDeckPopup').style.display = 'none';
+    //             deleteDeck(deckId);
+    //         }
+    //         document.getElementById('cancelDeleteDeckBtn').onclick = () => {
+    //             document.getElementById('confirmDeleteDeckPopup').style.display = 'none';
+    //         }
+    //     }
+    // });
 
-    document.getElementById('deleteDeckInPage').addEventListener('click', () => {
-        deleteDeck(currentDeckId);
-    });
+    // document.getElementById('deleteDeckInPage').addEventListener('click', () => {
+    //     deleteDeck(currentDeckId);
+    // });
 
     document.querySelectorAll('.uploadBtn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -512,49 +512,49 @@ document.addEventListener('DOMContentLoaded', async function () {
     const vocabRowContainer = document.getElementById('vocabRowContainer');
     const vocabEditId = document.getElementById('vocabEditId');
 
-    document.getElementById('addVocabBtn').addEventListener('click', () => {
-        document.getElementById('vocabSavePopup').style.display = 'flex';
-        document.getElementById('vocabFront').focus();
-    });
+    // document.getElementById('addVocabBtn').addEventListener('click', () => {
+    //     document.getElementById('vocabSavePopup').style.display = 'flex';
+    //     document.getElementById('vocabFront').focus();
+    // });
 
-    vocabFront.addEventListener('keypress', (e) => {
-        if (e.key == 'Enter') {
-            vocabBack.focus();
-        }
-    });
+    // vocabFront.addEventListener('keypress', (e) => {
+    //     if (e.key == 'Enter') {
+    //         vocabBack.focus();
+    //     }
+    // });
 
-    document.getElementById('vocabBack').addEventListener('keypress', (e) => {
-        if (e.key == 'Enter') {
-            e.preventDefault();
-            document.getElementById('saveVocabBtn').click();
-        }
-    });
+    // document.getElementById('vocabBack').addEventListener('keypress', (e) => {
+    //     if (e.key == 'Enter') {
+    //         e.preventDefault();
+    //         document.getElementById('saveVocabBtn').click();
+    //     }
+    // });
 
-    document.getElementById('saveVocabBtn').addEventListener('click', () => {
-        const frontText = vocabFront.value.trim();
-        const backText = vocabBack.value.trim();
-        const vocabId = vocabEditId.value;
+    // document.getElementById('saveVocabBtn').addEventListener('click', () => {
+    //     const frontText = vocabFront.value.trim();
+    //     const backText = vocabBack.value.trim();
+    //     const vocabId = vocabEditId.value;
 
-        if (!frontText || !backText) {
-            alert('Please insert values for both sides of the card');
-            return;
-        }        
-        if (vocabId) {
-            editVocab(vocabId, frontText, backText, currentDeckId);
-        } else {
-            createVocab(frontText, backText, currentDeckId);
-        }
-        document.getElementById('vocabSavePopup').style.display = 'none';
-        vocabFront.value = '';
-        vocabBack.value = '';
-        vocabEditId.value = '';
-    });
+    //     if (!frontText || !backText) {
+    //         alert('Please insert values for both sides of the card');
+    //         return;
+    //     }        
+    //     if (vocabId) {
+    //         editVocab(vocabId, frontText, backText, currentDeckId);
+    //     } else {
+    //         createVocab(frontText, backText, currentDeckId);
+    //     }
+    //     document.getElementById('vocabSavePopup').style.display = 'none';
+    //     vocabFront.value = '';
+    //     vocabBack.value = '';
+    //     vocabEditId.value = '';
+    // });
     
-    document.getElementById('cancelVocabBtn').addEventListener('click', () => {
-        document.getElementById('vocabSavePopup').style.display = 'none';
-        vocabFront.value = '';
-        vocabBack.value = '';
-    });
+    // document.getElementById('cancelVocabBtn').addEventListener('click', () => {
+    //     document.getElementById('vocabSavePopup').style.display = 'none';
+    //     vocabFront.value = '';
+    //     vocabBack.value = '';
+    // });
 
     vocabRowContainer.addEventListener('click', async (e) => {
         // dropdown toggle for edit/delete
@@ -570,42 +570,42 @@ document.addEventListener('DOMContentLoaded', async function () {
         //     e.stopPropagation();
         // }
         // delete
-        if (e.target.classList.contains('delete-vocab')) {
-            e.preventDefault();
-            const vocabId = e.target.getAttribute('data-id');
-            document.getElementById('confirmDeleteVocabPopup').style.display = 'flex';
-            document.getElementById('confirmDeleteVocabBtn').onclick = () => {
-                document.getElementById('confirmDeleteVocabPopup').style.display = 'none';
-                deleteVocab(vocabId, currentDeckId);
-            }   
-            document.getElementById('cancelDeleteVocabBtn').onclick = () => {
-                document.getElementById('confirmDeleteVocabPopup').style.display = 'none';
-            }
-        }
+        // if (e.target.classList.contains('delete-vocab')) {
+        //     e.preventDefault();
+        //     const vocabId = e.target.getAttribute('data-id');
+        //     document.getElementById('confirmDeleteVocabPopup').style.display = 'flex';
+        //     document.getElementById('confirmDeleteVocabBtn').onclick = () => {
+        //         document.getElementById('confirmDeleteVocabPopup').style.display = 'none';
+        //         deleteVocab(vocabId, currentDeckId);
+        //     }   
+        //     document.getElementById('cancelDeleteVocabBtn').onclick = () => {
+        //         document.getElementById('confirmDeleteVocabPopup').style.display = 'none';
+        //     }
+        // }
         
-        if (e.target.classList.contains('edit-vocab')) {
-            e.preventDefault();
-            const menu = e.target.closest('.dropdown-content');
-            menu.style.display = 'none';
+        // if (e.target.classList.contains('edit-vocab')) {
+        //     e.preventDefault();
+        //     const menu = e.target.closest('.dropdown-content');
+        //     menu.style.display = 'none';
 
-            const vocabId = e.target.getAttribute('data-id');
-            const vocabSavePopup = document.getElementById('vocabSavePopup');
-            const vocabEditId = document.getElementById('vocabEditId');
-            const vocabFront = document.getElementById('vocabFront');
-            const vocabBack = document.getElementById('vocabBack');
+        //     const vocabId = e.target.getAttribute('data-id');
+        //     const vocabSavePopup = document.getElementById('vocabSavePopup');
+        //     const vocabEditId = document.getElementById('vocabEditId');
+        //     const vocabFront = document.getElementById('vocabFront');
+        //     const vocabBack = document.getElementById('vocabBack');
 
-            // Populate the edit form with current values
-            const rawCache = localStorage.getItem('vocabs_cached');
-            const cachedVocabs = rawCache ? JSON.parse(rawCache) : [];
-            const currentVocab = cachedVocabs.find(v => v.id === vocabId);
-            if (currentVocab) {
-                vocabEditId.value = currentVocab.id;
-                vocabFront.value = currentVocab.front;
-                vocabBack.value = currentVocab.back;
-            }
+        //     // Populate the edit form with current values
+        //     const rawCache = localStorage.getItem('vocabs_cached');
+        //     const cachedVocabs = rawCache ? JSON.parse(rawCache) : [];
+        //     const currentVocab = cachedVocabs.find(v => v.id === vocabId);
+        //     if (currentVocab) {
+        //         vocabEditId.value = currentVocab.id;
+        //         vocabFront.value = currentVocab.front;
+        //         vocabBack.value = currentVocab.back;
+        //     }
 
-            vocabSavePopup.style.display = 'flex';
-        }
+        //     vocabSavePopup.style.display = 'flex';
+        // }
     });
 
 }); // DOMContent loaded

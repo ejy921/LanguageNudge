@@ -4,7 +4,7 @@ import { CirclePlus, Trash2, EllipsisVertical, ChevronDown } from 'lucide-react'
 
 export default function Vocabs({ deckId, navigate }) {
     const [vocabs, setVocabs] = useState([]);
-    const [popup, setPopup] = useState({ type: null, card: null });
+    const [popup, setPopup] = useState({ type: null, vocab: null });
     const [formData, setFormData] = useState({ front: '', back: '' });
 
     const [activeMenuId, setActiveMenuId] = useState(null);
@@ -61,22 +61,8 @@ export default function Vocabs({ deckId, navigate }) {
         }
     };
 
-    const openAddCardPopup = () => {
-        setFormData({ front: '', back: '' });
-        setPopup({ type: 'add', card: null });
-    };
-
-    const openDeleteCardPopup = (card) => {
-        setPopup({ type: 'delete', card });
-    };
-
-    const openEditCardPopup = (card) => {
-        setFormData({ front: card.front, back: card.back });
-        setPopup({ type: 'edit', card });
-    }
-
     const closePopup = () => {
-        setPopup({ type: null, card: null });
+        setPopup({ type: null, vocab: null });
         setFormData({ front: '', back: '' });
     };
 
@@ -129,7 +115,7 @@ export default function Vocabs({ deckId, navigate }) {
         const { data, error } = await supabase
             .from('vocab')
             .update({ front: formData.front, back: formData.back })
-            .eq('id', popup.card.id)
+            .eq('id', popup.vocab.id)
             .select();
 
         if (error) {
@@ -137,7 +123,7 @@ export default function Vocabs({ deckId, navigate }) {
             alert('Failed to update card');
         } else {
             if (data && data.length > 0) {
-                const updatedVocabs = vocabs.map(vocab => vocab.id === popup.card.id ? data[0] : vocab);
+                const updatedVocabs = vocabs.map(vocab => vocab.id === popup.vocab.id ? data[0] : vocab);
                 setVocabs(updatedVocabs);
                 localStorage.setItem(`supabase_vocabs_cache_${deckId}`, JSON.stringify(updatedVocabs));
                 closePopup();
@@ -158,7 +144,7 @@ export default function Vocabs({ deckId, navigate }) {
 
     return (
         <div className='vocabs' style={{display: 'flex', flexDirection: 'column'}}>
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', margin: '10px 0px', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '90%', justifyContent: 'space-between', margin: '10px', gap: '12px' }}>
                 <input type='text' className='text-input' placeholder='Search vocab...' />
                 <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: '0px', cursor: 'pointer', borderStyle: 'solid', borderWidth: '1px', borderColor: 'lightgray', borderRadius: '4px', padding: '2px', minWidth: '50px' }}>
                     <p style={{ fontSize: '8px', margin: 0}}>Sort by</p>
@@ -180,8 +166,11 @@ export default function Vocabs({ deckId, navigate }) {
                         </div>
                     )}
                 </div>
-                <CirclePlus onClick={() => openAddCardPopup()} className='my-icon' />
-                <Trash2 className='my-icon' />
+                <CirclePlus className='my-icon' onClick={() => {
+                    setFormData({ front: '', back: '' });
+                    setPopup({ type: 'add', vocab: null });
+                }}/>
+                <Trash2 className='my-icon' onClick={() => setPopup({type: 'deletedeck', vocab: null})}/>
             </div>
 
             <div className='container-box' style={{ borderWidth: '1px', borderColor: 'lightgray', padding: 0, minHeight: '20px', minWidth: '90%' }}>
@@ -196,13 +185,16 @@ export default function Vocabs({ deckId, navigate }) {
                                     <p onClick={(e) => {
                                         e.stopPropagation();
                                         setActiveMenuId(null);
-                                        openEditCardPopup(vocab);}}>
+                                        setFormData({front: vocab.front, back: vocab.back});
+                                        setPopup({type: 'edit', vocab});}}
+                                        style={{pointer: 'cursor'}}>
                                         Edit
                                     </p>
                                     <p onClick={(e) => {
                                         e.stopPropagation();
                                         setActiveMenuId(null);
-                                        openEditCardPopup(vocab);}}>
+                                        setPopup({type: 'delete', vocab});}}
+                                        style={{pointer: 'cursor'}}>
                                         Delete
                                     </p>
                                 </div>
@@ -224,11 +216,11 @@ export default function Vocabs({ deckId, navigate }) {
                 </div>
             )}
 
-            {(popup.type === 'delete') && (
+            {(popup.type === 'delete' || popup.type === 'deletedeck') && (
                 <div className='mini-popup' style={{ width: '190px' }}>
-                    <p style={{ fontSize: '13px', margin: '3px' }}>Delete card</p>
+                    <p style={{ fontSize: '13px', margin: '3px' }}>{popup.type === 'delete' ? 'Delete card' : 'Delete deck'}</p>
                     <div>
-                        <button onClick={() => confirmDelete(popup.card.id)} style={{ padding: '5px', fontSize: '10px', backgroundColor: 'red' }}>Delete</button>
+                        <button onClick={() => confirmDelete(popup.vocab.id)} style={{ padding: '5px', fontSize: '10px', backgroundColor: 'red' }}>Delete</button>
                         <button onClick={closePopup} style={{ padding: '5px', fontSize: '10px', backgroundColor: '#b0b0b0' }}>Cancel</button>
                     </div>
                 </div>
