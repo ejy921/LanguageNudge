@@ -1,23 +1,42 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Home from '../src/components/Home'; // Adjust path if needed
 
 // mock supabase setup
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockInsert = vi.fn();
-const mockDelete = vi.fn();
-const mockFrom = vi.fn();
-const mockGetUser = vi.fn(); 
+let mockSelect = vi.fn();
+let mockEq = vi.fn();
+let mockInsert = vi.fn();
+let mockDelete = vi.fn();
+let mockFrom = vi.fn();
+let mockGetUser = vi.fn(); 
 
-vi.mock('../src/supabaseClient', () => ({
-  supabase: {
-    from: mockFrom,
-    auth: {
-      getUser: mockGetUser,
+vi.mock('../src/supabaseClient', () => {
+  // create mocks inside the factory (factory gets hoisted) and expose them to the tests via globalThis
+  const _mockSelect = vi.fn();
+  const _mockEq = vi.fn();
+  const _mockInsert = vi.fn();
+  const _mockDelete = vi.fn();
+  const _mockFrom = vi.fn(() => ({ select: _mockSelect, insert: _mockInsert, delete: _mockDelete }));
+  const _mockGetUser = vi.fn();
+
+  globalThis.__TEST_MOCKS__ = globalThis.__TEST_MOCKS__ || {};
+  Object.assign(globalThis.__TEST_MOCKS__, {
+    mockSelect: _mockSelect,
+    mockEq: _mockEq,
+    mockInsert: _mockInsert,
+    mockDelete: _mockDelete,
+    mockFrom: _mockFrom,
+    mockGetUser: _mockGetUser,
+  });
+
+  return {
+    supabase: {
+      from: _mockFrom,
+      auth: { getUser: _mockGetUser },
     },
-  },
-}));
+  };
+});
 
 describe('Home Component', () => {
   const mockNavigate = vi.fn();
@@ -34,13 +53,18 @@ describe('Home Component', () => {
     vi.clearAllMocks();
     localStorage.clear();
 
+    // Reassign our local handles to the mocks created inside the vi.mock factory
+    if (globalThis.__TEST_MOCKS__) {
+      ({ mockSelect, mockEq, mockInsert, mockDelete, mockFrom, mockGetUser } = globalThis.__TEST_MOCKS__);
+    }
+
     mockFrom.mockReturnValue({
       select: mockSelect,
       insert: mockInsert,
       delete: mockDelete,
     });
 
-    mockSelect.mockReturnValue({ eq: mockEq });
+    mockSelect.mockImplementation(() => ({ eq: mockEq }));
     mockInsert.mockReturnValue({ select: mockSelect });
     mockDelete.mockReturnValue({ eq: mockEq });
     
@@ -54,7 +78,7 @@ describe('Home Component', () => {
     const mockDecks = createMockDecks(2);
     mockEq.mockResolvedValue({ data: mockDecks, error: null });
 
-    render(<Home session={mockSession} navigate={mockNavigate} />);
+    render(React.createElement(Home, { session: mockSession, navigate: mockNavigate }));
 
     expect(mockFrom).toHaveBeenCalledWith('decks');
 
@@ -68,9 +92,9 @@ describe('Home Component', () => {
     mockEq.mockResolvedValueOnce({ data: [], error: null });
 
     const newDeck = { id: 'new-deck-id', name: 'Biology 101', user_id: 'user-123' };
-    mockSelect.mockResolvedValueOnce({ data: [newDeck], error: null }); // Response for the insert
+    mockInsert.mockReturnValueOnce({ select: () => Promise.resolve({ data: [newDeck], error: null }) }); // Response for the insert
 
-    const { container } = render(<Home session={mockSession} navigate={mockNavigate} />);
+    const { container } = render(React.createElement(Home, { session: mockSession, navigate: mockNavigate }));
 
     const addIcon = container.querySelector('.lucide-circle-plus');
     fireEvent.click(addIcon);
@@ -105,7 +129,7 @@ describe('Home Component', () => {
     mockEq.mockResolvedValueOnce({ data: mockDecks, error: null }); 
     mockEq.mockResolvedValueOnce({ error: null }); 
 
-    const { container } = render(<Home session={mockSession} navigate={mockNavigate} />);
+    const { container } = render(React.createElement(Home, { session: mockSession, navigate: mockNavigate }));
 
     await waitFor(() => expect(screen.getByText('Deck 1')).toBeInTheDocument());
 
@@ -127,7 +151,7 @@ describe('Home Component', () => {
     const mockDecks = createMockDecks(1);
     mockEq.mockResolvedValue({ data: mockDecks, error: null });
 
-    render(<Home session={mockSession} navigate={mockNavigate} />);
+    render(React.createElement(Home, { session: mockSession, navigate: mockNavigate }));
     await waitFor(() => expect(screen.getByText('Deck 1')).toBeInTheDocument());
 
     fireEvent.click(screen.getByText('View deck'));
@@ -142,7 +166,7 @@ describe('Home Component', () => {
     const serverData = [{ id: 'server-1', name: 'Server Deck', user_id: 'user-123' }];
     mockEq.mockResolvedValue({ data: serverData, error: null });
 
-    render(<Home session={mockSession} navigate={mockNavigate} />);
+    render(React.createElement(Home, { session: mockSession, navigate: mockNavigate }));
 
     expect(screen.getByText('Cached Deck')).toBeInTheDocument();
 

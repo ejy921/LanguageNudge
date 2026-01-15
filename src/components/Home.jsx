@@ -39,9 +39,10 @@ export default function Home({ session, navigate }) {
     }, [session?.user?.id]);
 
     const handleAddDeck = async (e) => {
-        // stop page reload when from is submitted
+        // stop page reload when form is submitted
         e.preventDefault();
-        const deckName = e.target.deckName.value;
+        const formData = new FormData(e.currentTarget);
+        const deckName = formData.get('deckName');
         if (!deckName) {
             alert('Please enter a deck name');
             return;

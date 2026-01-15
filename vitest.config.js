@@ -8,5 +8,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/setup.js'], // run chrome mocks before tests
     css: false, // speeds up tests
+    transformMode: {
+      web: [/\.[jt]sx?$/]
+    }
   },
 });

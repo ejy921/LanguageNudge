@@ -1,22 +1,42 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import Vocabs from '../src/components/Vocabs';
 import { supabase } from '../src/supabaseClient';
 
 // --- 1. Robust Supabase Mock Setup ---
 // We need to mock chainable methods (.select().eq(), .insert().select(), etc.)
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockInsert = vi.fn();
-const mockUpdate = vi.fn();
-const mockDelete = vi.fn();
-const mockFrom = vi.fn();
+let mockSelect = vi.fn();
+let mockEq = vi.fn();
+let mockInsert = vi.fn();
+let mockUpdate = vi.fn();
+let mockDelete = vi.fn();
+let mockFrom = vi.fn();
 
-vi.mock('../src/supabaseClient', () => ({
-  supabase: {
-    from: mockFrom,
-  }
-}));
+vi.mock('../src/supabaseClient', () => {
+  const _mockSelect = vi.fn();
+  const _mockEq = vi.fn();
+  const _mockInsert = vi.fn();
+  const _mockUpdate = vi.fn();
+  const _mockDelete = vi.fn();
+  const _mockFrom = vi.fn(() => ({ select: _mockSelect, insert: _mockInsert, update: _mockUpdate, delete: _mockDelete }));
+
+  globalThis.__TEST_MOCKS__ = globalThis.__TEST_MOCKS__ || {};
+  Object.assign(globalThis.__TEST_MOCKS__, {
+    mockSelect: _mockSelect,
+    mockEq: _mockEq,
+    mockInsert: _mockInsert,
+    mockUpdate: _mockUpdate,
+    mockDelete: _mockDelete,
+    mockFrom: _mockFrom,
+  });
+
+  return {
+    supabase: {
+      from: _mockFrom,
+    },
+  };
+});
 
 describe('Vocabs Component', () => {
   const mockDeckId = 123;
@@ -35,6 +55,11 @@ describe('Vocabs Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+
+    // Reassign to factory-exposed mocks if present
+    if (globalThis.__TEST_MOCKS__) {
+      ({ mockSelect, mockEq, mockInsert, mockUpdate, mockDelete, mockFrom } = globalThis.__TEST_MOCKS__);
+    }
 
     // Default Chain Configuration
     // This allows calls to return "this" so chains don't crash
@@ -67,7 +92,7 @@ describe('Vocabs Component', () => {
     // Setup Mock: .from().select().eq() -> returns data
     mockEq.mockResolvedValue({ data: mockData, error: null });
 
-    render(<Vocabs deckId={mockDeckId} navigate={mockNavigate} />);
+    render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
 
     // Check if Supabase was called correctly
     expect(mockFrom).toHaveBeenCalledWith('vocab');
@@ -88,10 +113,10 @@ describe('Vocabs Component', () => {
     mockEq.mockResolvedValueOnce({ data: existingData, error: null });
     
     // 2. Mock Insert Chain: .insert().select()
-    // Note: mockSelect is the last call in the insert chain
-    mockSelect.mockResolvedValueOnce({ data: [newCard], error: null });
+    // Ensure the insert call returns a select() that resolves to the new card (avoid consuming mockSelect used for fetch)
+    mockInsert.mockReturnValueOnce({ select: () => Promise.resolve({ data: [newCard], error: null }) });
 
-    const { container } = render(<Vocabs deckId={mockDeckId} navigate={mockNavigate} />);
+    const { container } = render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
 
     // Wait for load
     await waitFor(() => expect(screen.getByText('Front 1')).toBeInTheDocument());
@@ -130,10 +155,10 @@ describe('Vocabs Component', () => {
     mockEq.mockResolvedValueOnce({ data: mockData, error: null });
 
     // 2. Mock Update Chain: .update().eq().select()
-    // Here, `select` is the last function called
-    mockSelect.mockResolvedValueOnce({ data: [updatedCard], error: null });
+    // Here, eq().select() should resolve to the updated card without interfering with the initial fetch
+    mockEq.mockReturnValueOnce({ select: () => Promise.resolve({ data: [updatedCard], error: null }) });
 
-    const { container } = render(<Vocabs deckId={mockDeckId} navigate={mockNavigate} />);
+    const { container } = render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
     await waitFor(() => expect(screen.getByText('Front 1')).toBeInTheDocument());
 
     // Open the individual menu (EllipsisVertical)
@@ -163,14 +188,13 @@ describe('Vocabs Component', () => {
   it('deletes a card', async () => {
     const mockData = createMockVocabs(1);
 
-    // 1. Mock Fetch
-    mockEq.mockResolvedValueOnce({ data: mockData, error: null });
+    // Mock fetch and delete chains explicitly to avoid ordering issues
+    mockFrom.mockReturnValueOnce({
+      select: () => ({ eq: () => Promise.resolve({ data: mockData, error: null }) }),
+      delete: () => ({ eq: () => Promise.resolve({ error: null }) }),
+    });
 
-    // 2. Mock Delete Chain: .delete().eq()
-    // Here, `eq` is the last function called
-    mockEq.mockResolvedValueOnce({ error: null }); 
-
-    const { container } = render(<Vocabs deckId={mockDeckId} navigate={mockNavigate} />);
+    const { container } = render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
     await waitFor(() => expect(screen.getByText('Front 1')).toBeInTheDocument());
 
     // Open menu
@@ -183,8 +207,8 @@ describe('Vocabs Component', () => {
     // Verify Confirmation Popup
     expect(screen.getByText('Delete card')).toBeInTheDocument();
 
-    // Confirm Delete
-    const confirmBtn = screen.getAllByText('Delete')[1]; // [0] is the menu option (if visible), [1] is the button
+    // Confirm Delete (use role to pick the actual button)
+    const confirmBtn = screen.getByRole('button', { name: 'Delete' });
     fireEvent.click(confirmBtn);
 
     // Assertions
@@ -202,9 +226,10 @@ describe('Vocabs Component', () => {
     
     const mockData = [vocabB, vocabA, vocabC]; // Random order initially
 
-    mockEq.mockResolvedValue({ data: mockData, error: null });
+    // Mock the fetch chain directly so select/eq chaining won't get consumed
+    mockFrom.mockReturnValueOnce({ select: () => ({ eq: () => Promise.resolve({ data: mockData, error: null }) }) });
 
-    const { container } = render(<Vocabs deckId={mockDeckId} navigate={mockNavigate} />);
+    const { container } = render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
     await waitFor(() => expect(screen.getByText('Apple')).toBeInTheDocument());
 
     // Open Sort Menu
@@ -232,4 +257,24 @@ describe('Vocabs Component', () => {
     expect(rowsNewest[1]).toHaveTextContent('Banana');
     expect(rowsNewest[2]).toHaveTextContent('Apple');
   });
-});
+
+  it('uses localStorage cache if available', async () => {
+    const cachedData = [{ id: 10, front: 'Cached Vocab', back: 'C', deck_id: mockDeckId }];
+    localStorage.setItem(`supabase_vocabs_cache_${mockDeckId}`, JSON.stringify(cachedData));
+
+    const serverData = [{ id: 20, front: 'Server Vocab', back: 'S', deck_id: mockDeckId }];
+
+    // Make sure the server fetch returns serverData and doesn't consume the factory's default chain
+    mockFrom.mockReturnValueOnce({ select: () => ({ eq: () => Promise.resolve({ data: serverData, error: null }) }) });
+
+    render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
+
+    // cached item should be rendered immediately
+    expect(screen.getByText('Cached Vocab')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('Server Vocab')).toBeInTheDocument();
+      expect(localStorage.getItem(`supabase_vocabs_cache_${mockDeckId}`)).toContain('Server Vocab');
+    });
+  });
+})
