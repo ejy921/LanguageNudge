@@ -73,7 +73,7 @@ export default function Home({ session, navigate }) {
         if (error) {
             console.error('Error deleting deck:', error);
         } else {
-            localStorage.setItem(`supabase_decks_cache_${id}`, JSON.stringify(updatedDecks));
+            localStorage.setItem('supabase_decks_cache', JSON.stringify(updatedDecks));
             setShowDeleteDeckPopup(false);
         }
     };
