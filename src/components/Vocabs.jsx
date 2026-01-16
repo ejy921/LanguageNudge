@@ -11,6 +11,8 @@ export default function Vocabs({ deckId, navigate }) {
     const [activeSortbyId, setActiveSortbyId] = useState(null);
     const [sortBy, setSortBy] = useState('oldest'); // 'name', 'newest', 'oldest'
 
+    const [searchQuery, setSearchQuery] = useState('');
+
     useEffect(() => {
         fetchVocabs(deckId);
         console.log('Rendering Vocabs Component. Vocabs:', vocabs);
@@ -142,27 +144,29 @@ export default function Vocabs({ deckId, navigate }) {
         return 0;
     })
 
+    
+    const filteredVocabs = vocabs.filter(vocab => {
+        const query = searchQuery.toLowerCase();
+
+        const frontMatch = (vocab.front || '').toLowerCase().includes(query);
+        const backMatch = (vocab.back || '').toLowerCase().includes(query);
+        return frontMatch || backMatch;
+    });
+
+    const sortedVocabs = sortVocabs(filteredVocabs, sortBy);
+    
     return (
         <div className='vocabs' style={{display: 'flex', flexDirection: 'column'}}>
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '90%', justifyContent: 'space-between', margin: '10px', gap: '12px' }}>
-                <input type='text' className='text-input' placeholder='Search vocab...' />
+                <input type='text' className='text-input' placeholder='Search vocab...' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                 <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: '0px', cursor: 'pointer', borderStyle: 'solid', borderWidth: '1px', borderColor: 'lightgray', borderRadius: '4px', padding: '2px', minWidth: '50px' }}>
                     <p style={{ fontSize: '8px', margin: 0}}>Sort by</p>
                     <ChevronDown className='my-icon' onClick={(e) => toggleSortbyMenu(e)}/>
                     {activeSortbyId === deckId && (
                         <div className='dropdown-content' style={{alignItems: 'stretch', textAlign: 'left', right: '60px', top: '90px'}}>
-                            <p onClick={(e) => {
-                                setSortBy('name');
-                                setActiveSortbyId(null);
-                            }}>Name</p>
-                            <p onClick={(e) => {
-                                setSortBy('newest');
-                                setActiveSortbyId(null);
-                            }}>Newest</p>
-                            <p onClick={(e) => {
-                                setSortBy('oldest');
-                                setActiveSortbyId(null);
-                            }}>Oldest</p>
+                            <p onClick={(e) => { setSortBy('name'); setActiveSortbyId(null); }}>Name</p>
+                            <p onClick={(e) => { setSortBy('newest'); setActiveSortbyId(null); }}>Newest</p>
+                            <p onClick={(e) => { setSortBy('oldest'); setActiveSortbyId(null); }}>Oldest</p>
                         </div>
                     )}
                 </div>
