@@ -133,7 +133,7 @@ export default function Vocabs({ deckId, navigate }) {
         }
     } 
 
-    const sortedVocabs = [...vocabs].sort((a, b) => {
+    const sortVocabs = [...vocabs].sort((a, b) => {
         if (sortBy === 'name') {
             return a.front.localeCompare(b.front);
         } else if (sortBy === 'newest') {

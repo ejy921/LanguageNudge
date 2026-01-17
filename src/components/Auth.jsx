@@ -8,6 +8,8 @@ export default function Auth({ onLoginSuccess }) {
     const [mode, setMode] = useState('login'); // 'login' or 'signup'
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+
+    const [error, setError] = useState(null);
     
     const handleAuth = async (e) => {
         e.preventDefault();
@@ -48,6 +50,20 @@ export default function Auth({ onLoginSuccess }) {
             setPassword('');
         }
     };
+
+    // const googleLogin = async () => {
+    //     try {
+    //         setLoading(true);
+    //         setError(null);
+
+    //         const redirectUrl = Chrome.identity.getRedirectURL();
+
+    //         const { data, error: signInError } = await supabase.auth.signInwithOAuth({
+    //             provider: 'google',
+
+    //         })
+    //     }
+    // }
 
     return (
         <div className="auth-page">
