@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { CirclePlus, Trash2, EllipsisVertical, ChevronDown } from 'lucide-react';
+import { sortVocabs, getVocabsCacheKey } from '../utils/vocabUtils';
 
 export default function Vocabs({ deckId, navigate }) {
     const [vocabs, setVocabs] = useState([]);
@@ -35,7 +36,7 @@ export default function Vocabs({ deckId, navigate }) {
     }
 
     async function fetchVocabs() {
-        const cachedVocabs = localStorage.getItem(`supabase_vocabs_cache_${deckId}`);
+        const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
         if (cachedVocabs) {
             const parsed = JSON.parse(cachedVocabs);
             if (Array.isArray(parsed)) {
@@ -55,11 +56,11 @@ export default function Vocabs({ deckId, navigate }) {
         if (error) {
             console.error('Error fetching vocabs:', error);
         } else {
-            const cachedVocabsStr = JSON.stringify(data);
-            if (cachedVocabsStr !== cachedVocabs) {
-                setVocabs(data || []);
-                localStorage.setItem(`supabase_vocabs_cache_${deckId}`, cachedVocabsStr);
-            }
+                const cachedVocabsStr = JSON.stringify(data);
+                if (cachedVocabsStr !== cachedVocabs) {
+                    setVocabs(data || []);
+                    localStorage.setItem(getVocabsCacheKey(deckId), cachedVocabsStr);
+                }
         }
     };
 
@@ -80,7 +81,7 @@ export default function Vocabs({ deckId, navigate }) {
         } else {
             const updatedVocabs = vocabs.filter(v => v.id !== id);
             setVocabs(updatedVocabs);
-            localStorage.setItem(`supabase_vocabs_cache_${deckId}`, JSON.stringify(updatedVocabs));
+            localStorage.setItem(getVocabsCacheKey(deckId), JSON.stringify(updatedVocabs));
             closePopup();
         }
     }
@@ -103,7 +104,7 @@ export default function Vocabs({ deckId, navigate }) {
             if (data) {
                 const newVocabList = [...vocabs, ...data];
                 setVocabs(newVocabList);
-                localStorage.setItem(`supabase_vocabs_cache_${deckId}`, JSON.stringify(newVocabList));
+                localStorage.setItem(getVocabsCacheKey(deckId), JSON.stringify(newVocabList));
                 closePopup();
             }
         }
@@ -127,11 +128,12 @@ export default function Vocabs({ deckId, navigate }) {
             if (data && data.length > 0) {
                 const updatedVocabs = vocabs.map(vocab => vocab.id === popup.vocab.id ? data[0] : vocab);
                 setVocabs(updatedVocabs);
-                localStorage.setItem(`supabase_vocabs_cache_${deckId}`, JSON.stringify(updatedVocabs));
+                localStorage.setItem(getVocabsCacheKey(deckId), JSON.stringify(updatedVocabs));
                 closePopup();
             }
         }
     } 
+    const sortedVocabs = sortVocabs(vocabs, sortBy);
 
     const sortVocabs = [...vocabs].sort((a, b) => {
         if (sortBy === 'name') {
@@ -191,14 +193,14 @@ export default function Vocabs({ deckId, navigate }) {
                                         setActiveMenuId(null);
                                         setFormData({front: vocab.front, back: vocab.back});
                                         setPopup({type: 'edit', vocab});}}
-                                        style={{pointer: 'cursor'}}>
+                                        style={{cursor: 'pointer'}}>
                                         Edit
                                     </p>
                                     <p onClick={(e) => {
                                         e.stopPropagation();
                                         setActiveMenuId(null);
                                         setPopup({type: 'delete', vocab});}}
-                                        style={{pointer: 'cursor'}}>
+                                        style={{cursor: 'pointer'}}>
                                         Delete
                                     </p>
                                 </div>

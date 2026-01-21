@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { CirclePlus, Trash2 } from 'lucide-react';
+import { createDeck } from '../utils/deck';
 
 export default function Home({ session, navigate }) {
     const [decks, setDecks] = useState([]);
@@ -8,7 +9,6 @@ export default function Home({ session, navigate }) {
     const [showDeleteDeckPopup, setShowDeleteDeckPopup] = useState(false);
 
     useEffect(() => {
-        // define the function inside effect to avoid dependency issues
         async function fetchDecks() {
             const cachedDecks = localStorage.getItem('supabase_decks_cache');
             if (cachedDecks) {
@@ -27,7 +27,6 @@ export default function Home({ session, navigate }) {
                 console.error('Error fetching decks:', error);
             } else {
                 const validData = data || [];
-                // prevent unnecessary re-renders
                 if (JSON.stringify(validData) !== cachedDecks) {
                     setDecks(validData);
                     localStorage.setItem('supabase_decks_cache', JSON.stringify(validData));
@@ -35,7 +34,6 @@ export default function Home({ session, navigate }) {
             }
         }
         fetchDecks();
-    // re-run whenever session ID changes
     }, [session?.user?.id]);
 
     const handleAddDeck = async (e) => {
@@ -50,8 +48,7 @@ export default function Home({ session, navigate }) {
 
         const { data: { user }, error: userError} = await supabase.auth.getUser();
         
-        const currentDeckId = crypto.randomUUID();
-        const newDeck = {id: currentDeckId, name: deckName, user_id: user.id};
+        const newDeck = createDeck(deckName, user);
         const { data, error } = await supabase
             .from('decks')
             .insert([newDeck])
@@ -76,7 +73,7 @@ export default function Home({ session, navigate }) {
         if (error) {
             console.error('Error deleting deck:', error);
         } else {
-            localStorage.setItem(`supabase_decks_cache_${id}`, JSON.stringify(updatedDecks));
+            localStorage.setItem('supabase_decks_cache', JSON.stringify(updatedDecks));
             setShowDeleteDeckPopup(false);
         }
     };
