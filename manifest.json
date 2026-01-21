@@ -14,9 +14,16 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "identity"
   ],
   "host_permissions": [
     "https://*.supabase.co/*"
-  ]
+  ],
+  "oauth2": {
+    "client_id": "GOOGLE_CLIENT_ID",
+    "scopes": [
+      "openid", "email", "profile"
+    ]
+  }
 }
