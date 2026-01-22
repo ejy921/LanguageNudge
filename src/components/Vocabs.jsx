@@ -69,7 +69,16 @@ export default function Vocabs({ deckId, navigate }) {
         setFormData({ front: '', back: '' });
     };
 
-    async function confirmDelete(id) {
+    async function handleDelete() {
+        if (popup.type === 'delete') {
+            await deleteCard(popup.vocab.id);
+        } else if (popup.type === 'deletedeck') {
+            await deleteDeck();
+        }
+    }
+
+
+    async function deleteCard(id) {
         const { error } = await supabase
             .from('vocab')
             .delete()
@@ -133,7 +142,14 @@ export default function Vocabs({ deckId, navigate }) {
             }
         }
     } 
-    const sortedVocabs = sortVocabs(vocabs, sortBy);
+    
+    const filteredVocabs = vocabs.filter(vocab => {
+        const query = searchQuery.toLowerCase();
+
+        const frontMatch = (vocab.front || '').toLowerCase().includes(query);
+        const backMatch = (vocab.back || '').toLowerCase().includes(query);
+        return frontMatch || backMatch;
+    });
 
     const sortVocabs = [...vocabs].sort((a, b) => {
         if (sortBy === 'name') {
@@ -146,14 +162,9 @@ export default function Vocabs({ deckId, navigate }) {
         return 0;
     })
 
-    
-    const filteredVocabs = vocabs.filter(vocab => {
-        const query = searchQuery.toLowerCase();
+    const vocabsToDisplay = sortVocabs(filteredVocabs, sortBy);
 
-        const frontMatch = (vocab.front || '').toLowerCase().includes(query);
-        const backMatch = (vocab.back || '').toLowerCase().includes(query);
-        return frontMatch || backMatch;
-    });
+    
 
     const sortedVocabs = sortVocabs(filteredVocabs, sortBy);
     
@@ -180,7 +191,7 @@ export default function Vocabs({ deckId, navigate }) {
             </div>
 
             <div className='container-box' style={{ borderWidth: '1px', borderColor: 'lightgray', padding: 0, minHeight: '20px', minWidth: '90%' }}>
-                {sortedVocabs.map(vocab => (
+                {vocabsToDisplay.map(vocab => (
                     <div className='vocab-row' key={vocab.id}> 
                         <span>{vocab.front}</span>
                         <span>{vocab.back}</span>
@@ -226,7 +237,7 @@ export default function Vocabs({ deckId, navigate }) {
                 <div className='mini-popup' style={{ width: '190px' }}>
                     <p style={{ fontSize: '13px', margin: '3px' }}>{popup.type === 'delete' ? 'Delete card' : 'Delete deck'}</p>
                     <div>
-                        <button onClick={() => confirmDelete(popup.vocab.id)} style={{ padding: '5px', fontSize: '10px', backgroundColor: 'red' }}>Delete</button>
+                        <button onClick={() => handleDelete(popup.vocab.id)} style={{ padding: '5px', fontSize: '10px', backgroundColor: 'red' }}>Delete</button>
                         <button onClick={closePopup} style={{ padding: '5px', fontSize: '10px', backgroundColor: '#b0b0b0' }}>Cancel</button>
                     </div>
                 </div>
