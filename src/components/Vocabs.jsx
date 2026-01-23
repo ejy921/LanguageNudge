@@ -151,22 +151,7 @@ export default function Vocabs({ deckId, navigate }) {
         return frontMatch || backMatch;
     });
 
-    const sortVocabs = [...vocabs].sort((a, b) => {
-        if (sortBy === 'name') {
-            return a.front.localeCompare(b.front);
-        } else if (sortBy === 'newest') {
-            return new Date(b.created_at) - new Date(a.created_at);
-        } else if (sortBy === 'oldest') {
-            return new Date(a.created_at) - new Date(b.created_at);
-        }
-        return 0;
-    })
-
     const vocabsToDisplay = sortVocabs(filteredVocabs, sortBy);
-
-    
-
-    const sortedVocabs = sortVocabs(filteredVocabs, sortBy);
     
     return (
         <div className='vocabs' style={{display: 'flex', flexDirection: 'column'}}>
