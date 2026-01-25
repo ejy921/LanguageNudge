@@ -24,6 +24,33 @@ export default function Vocabs({ deckId, navigate }) {
         };
     }, [deckId]);
 
+    // watch state and sync to local storage
+    useEffect(() => {
+        if (deckId && vocabs.length > 0) {
+            localStorage.setItem(getVocabsCacheKey(deckId), JSON.stringify(vocabs));
+        }
+    }, [vocabs, deckId]);
+
+    async function fetchVocabs() {
+        const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
+        if (cachedVocabs) {
+            if (Array.isArray(parsed)) {
+                setVocabs(JSON.parse(cachedVocabs));
+            }
+        }
+        console.log('Fetching vocabs for deckId:', deckId);
+
+        const { data, error } = await supabase
+            .from('vocab')
+            .select('*')
+            .eq('deck_id', deckId);
+        if (error) {
+            console.error('Error fetching vocabs:', error);
+        } else {
+            setVocabs(data || []);
+        }
+    };
+
     const toggleMenu = (e, vocabId) => {
         e.stopPropagation();
         // if already open, close; if not, open menu
@@ -35,48 +62,30 @@ export default function Vocabs({ deckId, navigate }) {
         setActiveSortbyId(prev => prev === deckId ? null : deckId);
     }
 
-    async function fetchVocabs() {
-        const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
-        if (cachedVocabs) {
-            const parsed = JSON.parse(cachedVocabs);
-            if (Array.isArray(parsed)) {
-                setVocabs(parsed);
-            }
-        }
-
-        if (!deckId) {
-            console.error('No deckId provided to Vocabs component.');
-            return;
-        }
-        console.log('Fetching vocabs for deckId:', deckId);
-        const { data, error } = await supabase
-            .from('vocab')
-            .select('*')
-            .eq('deck_id', deckId);
-        if (error) {
-            console.error('Error fetching vocabs:', error);
-        } else {
-                const cachedVocabsStr = JSON.stringify(data);
-                if (cachedVocabsStr !== cachedVocabs) {
-                    setVocabs(data || []);
-                    localStorage.setItem(getVocabsCacheKey(deckId), cachedVocabsStr);
-                }
-        }
-    };
-
     const closePopup = () => {
         setPopup({ type: null, vocab: null });
         setFormData({ front: '', back: '' });
     };
 
     async function handleDelete() {
-        if (popup.type === 'delete') {
+        if (popup.type === 'delete' && popup.vocab) {
             await deleteCard(popup.vocab.id);
         } else if (popup.type === 'deletedeck') {
             await deleteDeck();
         }
     }
 
+    async function deleteDeck() {
+        const { error } = await supabase   
+            .from('decks')
+            .delete()
+            .eq('id', deckId);
+        if (error) {
+            console.error('Error deleting card:', error);
+        } else {
+            localStorage.removeItem(getVocabsCacheKey(deckId));
+        }
+    }
 
     async function deleteCard(id) {
         const { error } = await supabase
@@ -86,11 +95,9 @@ export default function Vocabs({ deckId, navigate }) {
 
         if (error) {
             console.error('Error deleting card:', error);
-            alert('Failed to delete card');
         } else {
             const updatedVocabs = vocabs.filter(v => v.id !== id);
             setVocabs(updatedVocabs);
-            localStorage.setItem(getVocabsCacheKey(deckId), JSON.stringify(updatedVocabs));
             closePopup();
         }
     }
@@ -113,7 +120,6 @@ export default function Vocabs({ deckId, navigate }) {
             if (data) {
                 const newVocabList = [...vocabs, ...data];
                 setVocabs(newVocabList);
-                localStorage.setItem(getVocabsCacheKey(deckId), JSON.stringify(newVocabList));
                 closePopup();
             }
         }
@@ -137,7 +143,6 @@ export default function Vocabs({ deckId, navigate }) {
             if (data && data.length > 0) {
                 const updatedVocabs = vocabs.map(vocab => vocab.id === popup.vocab.id ? data[0] : vocab);
                 setVocabs(updatedVocabs);
-                localStorage.setItem(getVocabsCacheKey(deckId), JSON.stringify(updatedVocabs));
                 closePopup();
             }
         }
@@ -151,7 +156,10 @@ export default function Vocabs({ deckId, navigate }) {
         return frontMatch || backMatch;
     });
 
-    const vocabsToDisplay = sortVocabs(filteredVocabs, sortBy);
+    const vocabsToDisplay = useMemo(() => {
+        return sortVocabs(filteredVocabs, sortBy);
+    }, [vocabs, searchQuery, sortBy]);
+    
     
     return (
         <div className='vocabs' style={{display: 'flex', flexDirection: 'column'}}>
@@ -222,7 +230,7 @@ export default function Vocabs({ deckId, navigate }) {
                 <div className='mini-popup' style={{ width: '190px' }}>
                     <p style={{ fontSize: '13px', margin: '3px' }}>{popup.type === 'delete' ? 'Delete card' : 'Delete deck'}</p>
                     <div>
-                        <button onClick={() => handleDelete(popup.vocab.id)} style={{ padding: '5px', fontSize: '10px', backgroundColor: 'red' }}>Delete</button>
+                        <button onClick={handleDelete} style={{ padding: '5px', fontSize: '10px', backgroundColor: 'red' }}>Delete</button>
                         <button onClick={closePopup} style={{ padding: '5px', fontSize: '10px', backgroundColor: '#b0b0b0' }}>Cancel</button>
                     </div>
                 </div>
