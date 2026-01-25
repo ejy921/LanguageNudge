@@ -218,6 +218,48 @@ describe('Vocabs Component', () => {
     });
   });
 
+  it('deletes the deck, clears cache, and navigates home', async () => {
+    // 1. Setup Supabase Mocks
+    // Call #1: Initial Fetch (Vocabs) -> Returns empty list
+    // Call #2: Delete Deck (Deck) -> Returns success (error: null)
+    mockEq
+      .mockResolvedValueOnce({ data: [], error: null }) 
+      .mockResolvedValueOnce({ error: null });          
+
+    // 2. Render
+    const { container } = render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
+
+    // Wait for initial load
+    await waitFor(() => expect(mockFrom).toHaveBeenCalledWith('vocab'));
+
+    // 3. Find and Click the Trash Icon
+    // This opens your custom "Mini Popup"
+    const trashIcon = container.querySelector('.lucide-trash-2');
+    fireEvent.click(trashIcon);
+
+    // 4. Verify Your Custom Popup UI appears
+    expect(screen.getByText('Delete deck')).toBeInTheDocument();
+
+    // 5. Click the Red "Delete" button inside your UI
+    // We target the button specifically
+    const deleteBtn = screen.getByRole('button', { name: 'Delete' });
+    fireEvent.click(deleteBtn);
+
+    // 6. Assertions
+    await waitFor(() => {
+        // A. Check Supabase 'delete' flow (No window.confirm needed!)
+        expect(mockFrom).toHaveBeenCalledWith('decks'); 
+        expect(mockDelete).toHaveBeenCalled();
+        expect(mockEq).toHaveBeenCalledWith('id', mockDeckId);
+
+        // B. Check Cache Clearing
+        expect(localStorage.getItem(`supabase_vocabs_cache_${mockDeckId}`)).toBeNull();
+
+        // C. Check Navigation
+        expect(mockNavigate).toHaveBeenCalledWith('home');
+    });
+  });
+
   it('handles sorting options', async () => {
     // Create 3 items with specific names to test sorting
     const vocabA = { id: 1, front: 'Apple', back: 'A', created_at: '2023-01-01', deck_id: 123 };

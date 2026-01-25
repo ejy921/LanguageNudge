@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { CirclePlus, Trash2, EllipsisVertical, ChevronDown } from 'lucide-react';
 import { sortVocabs, getVocabsCacheKey } from '../utils/vocabUtils';
@@ -34,6 +34,7 @@ export default function Vocabs({ deckId, navigate }) {
     async function fetchVocabs() {
         const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
         if (cachedVocabs) {
+            const parsed = JSON.parse(cachedVocabs);
             if (Array.isArray(parsed)) {
                 setVocabs(JSON.parse(cachedVocabs));
             }
@@ -84,6 +85,9 @@ export default function Vocabs({ deckId, navigate }) {
             console.error('Error deleting card:', error);
         } else {
             localStorage.removeItem(getVocabsCacheKey(deckId));
+            if (navigate) {
+                navigate('home');
+            }
         }
     }
 
