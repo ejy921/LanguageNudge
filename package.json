@@ -10,8 +10,9 @@
   "description": "LangNudge is a to-be Chrome extension that microdoses vocabulary during your day. Instead of countless pressing buttons in long study sessions, you get tiny, spaced-repetition-optimized nudges that show up in random intervals (which you can choose)!",
   "main": "background.js",
   "scripts": {
-    "test": "vitest",
-    "build": "node build.js"
+    "test": "vitest run",
+    "build": "node build.js",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
   "repository": {
     "type": "git",
