@@ -6,6 +6,8 @@ import Auth from './components/Auth';
 import Home from './components/Home';
 import Vocabs from './components/Vocabs';
 import Settings from './components/Settings';
+import NudgeCard from './components/NudgeCard';
+import NudgeQuiz from './components/NudgeQuiz';
 import { Settings as SettingsIcon, House } from 'lucide-react';
 
 export default function App() {
@@ -50,6 +52,8 @@ export default function App() {
                 {currentPage === 'home' && (<Home session={session} navigate={navigate} />)}
                 {currentPage === 'vocabs' && <Vocabs deckId={selectedDeckId} navigate={navigate} />}
                 {currentPage === 'settings' && <Settings navigate={navigate} />}
+                {currentPage === 'review' && <NudgeCard deckId={selectedDeckId} mode='review' navigate={navigate} />}
+                {currentPage === 'quiz' && <NudgeQuiz deckId={selectedDeckId} mode='quiz' navigate={navigate} />}
             </div>
         </div>
     );

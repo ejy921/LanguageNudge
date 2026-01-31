@@ -170,8 +170,8 @@ export default function Vocabs({ deckId, navigate }) {
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '90%', justifyContent: 'space-between', margin: '10px', gap: '12px' }}>
                 <input type='text' className='text-input' placeholder='Search vocab...' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                 <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: '0px', cursor: 'pointer', borderStyle: 'solid', borderWidth: '1px', borderColor: 'lightgray', borderRadius: '4px', padding: '2px', minWidth: '50px' }}>
-                    <p style={{ fontSize: '8px', margin: 0}}>Sort by</p>
-                    <ChevronDown className='my-icon' onClick={(e) => toggleSortbyMenu(e)}/>
+                    <p style={{ fontSize: '10px', margin: 0}}>Sort by</p>
+                    <ChevronDown style={{width: '15px', height: '15px'}} className='my-icon' onClick={(e) => toggleSortbyMenu(e)}/>
                     {activeSortbyId === deckId && (
                         <div className='dropdown-content' style={{alignItems: 'stretch', textAlign: 'left', right: '60px', top: '90px'}}>
                             <p onClick={(e) => { setSortBy('name'); setActiveSortbyId(null); }}>Name</p>

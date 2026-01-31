@@ -90,8 +90,8 @@ export default function Home({ session, navigate }) {
                         <div className='deck-row' style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                             <span>{deck.name}</span>
                             <button className='viewDeckBtn' onClick={() => navigate('vocabs', deck.id)}>View deck</button>
-                            <button className='sub-button'>Review</button>
-                            <button className='sub-button'>Quiz</button>
+                            <button className='sub-button' onClick={() => navigate('review', deck.id)}>Review</button>
+                            <button className='sub-button' onClick={() => navigate('quiz', deck.id)}>Quiz</button>
                             <Trash2 className='my-icon' onClick={() => setShowDeleteDeckPopup(true)}/>
                             {showDeleteDeckPopup && (
                                 <div className='mini-popup'>
