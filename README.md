@@ -18,5 +18,9 @@ LangNudge is a to-be Chrome Extension that bridges the gap between passive brows
 * Optimistic UI
 * CI pipeline + linting
 
+## Smart Review Logic
+
+The smart review involves prioritizing vocab that are more difficult for the user (which is saved from clicking 'correct' or incorrect' after each). The factors that are included are user performance, which is calculated with the 'correct'/'incorrect' response and the streak count for correct responses for that card, as well as the last reviewed time. 
+
 ## Program Architecture
 ![Picture of LangNudge program architecture](images/program_architecture.png)
