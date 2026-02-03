@@ -46,6 +46,10 @@ export default function App() {
             <div className="header">LangNudge
                 <House onClick={() => navigate('home')} className='my-icon' style={{position: 'absolute', right: '10px', marginTop: '3px', color: 'white'}}/>
                 <SettingsIcon onClick={() => navigate('settings')} className='my-icon' style={{position: 'absolute', right: '40px', marginTop: '3px', color: 'white'}}/>
+                <label className='switch'>
+                    <input type='checkbox' />
+                    <span className='slider round'></span>
+                </label>
             </div>
             <div className='app-container'>
                 {currentPage === 'auth' && <Auth onLoginSuccess={() => navigate('home')} />}
