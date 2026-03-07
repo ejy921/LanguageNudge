@@ -46,7 +46,7 @@ export default function Home({ session, navigate }) {
             return;
         }
 
-        const { data: { user }, error: userError} = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         
         const newDeck = createDeck(deckName, user);
         const { data, error } = await supabase
@@ -80,7 +80,6 @@ export default function Home({ session, navigate }) {
 
     return (
         <div className='home'>
-            {console.log("Rendering Home Component. Decks:", decks)}
             <h3 style={{paddingLeft: '10px'}}>Your decks</h3>
             <div className='decks-container'>
                 {decks.length === 0 && <p>No decks yet.</p>}

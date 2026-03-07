@@ -3,7 +3,6 @@ import { nextCard } from '../../src/utils/scheduler'; // Adjust path as needed
 
 // Constants from your file for reference in tests
 const HOUR = 60 * 60 * 1000;
-const NUDGE_BASE = 1.6;
 const REVIEW_BASE = 2.2;
 
 describe('nextCard', () => {

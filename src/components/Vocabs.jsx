@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { CirclePlus, Trash2, EllipsisVertical, ChevronDown } from 'lucide-react';
 import { sortVocabs, getVocabsCacheKey } from '../utils/vocabUtils';

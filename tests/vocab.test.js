@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Vocabs from '../src/components/Vocabs';
-import { supabase } from '../src/supabaseClient';
 
 // --- 1. Robust Supabase Mock Setup ---
 // We need to mock chainable methods (.select().eq(), .insert().select(), etc.)

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Upload } from 'lucide-react';
 
 export default function Welcome() {
@@ -10,12 +9,12 @@ export default function Welcome() {
                 <Upload/>
             </button>
             <p>Or try one of our curated selections!</p>
-            <button class="sub-button">Chinese</button>
-            <button class="sub-button">Spanish</button>
-            <button class="sub-button">French</button>
-            <button class="sub-button">German</button>
-            <button class="sub-button">Portuguese</button>
-            <button class="sub-button">Japanese</button>
+            <button className="sub-button">Chinese</button>
+            <button className="sub-button">Spanish</button>
+            <button className="sub-button">French</button>
+            <button className="sub-button">German</button>
+            <button className="sub-button">Portuguese</button>
+            <button className="sub-button">Japanese</button>
         </div>
     )
 }
