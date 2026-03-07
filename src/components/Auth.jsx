@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { supabase } from '../supabaseClient'; // need jsx
+import { supabase } from '../supabaseClient'; 
 
 export default function Auth({ onLoginSuccess }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [mode, setMode] = useState('login'); // 'login' or 'signup'
+    const [mode, setMode] = useState('signin'); // 'signin' or 'signup'
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
@@ -67,8 +67,8 @@ export default function Auth({ onLoginSuccess }) {
 
     return (
         <div className="auth-page">
-            <h2>{mode === 'signin' ? 'Welcome back to LangNudge!' : 'Welcome to LangNudge!'}</h2>
-            <p style={{ fontSize: 12, marginBottom: 20 }}>Get microdoses of vocabulary during your day, with both quiz and flashcard modes.</p>
+            <h3>{mode === 'signin' ? 'Welcome back to LangNudge!' : 'Welcome to LangNudge!'}</h3>
+            <p style={{ fontSize: 12, marginBottom: 20, marginInline: '10px' }}>Get microdoses of vocabulary during your day</p>
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: '7px', marginBottom: 0}}>
                 {errorMessage && <p style={{ color: 'red', fontSize: '9px', padding: 0, margin: 0 }}>{errorMessage}</p>}
                 {successMessage && <p style={{ color: 'green', fontSize: '9px', padding: 0, margin: 0 }}>{successMessage}</p>}

@@ -23,7 +23,9 @@ export function nextCard(score, review_time, streak, mode, list_size) {
         added_hours = ZERO_STREAK * list_size;
     }
 
-    const next_review = review_time + (added_hours * HOUR_UNIT);
+    const base = review_time || Date.now();
+    const next_review = base + (added_hours * HOUR_UNIT);
+
     return { next_review, streak };
     
-    }
+}

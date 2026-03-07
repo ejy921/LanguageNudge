@@ -8,12 +8,13 @@ import Vocabs from './components/Vocabs';
 import Settings from './components/Settings';
 import NudgeCard from './components/NudgeCard';
 import NudgeQuiz from './components/NudgeQuiz';
-import { Settings as SettingsIcon, House } from 'lucide-react';
+import { Settings as SettingsIcon, House, Bell, BellOff } from 'lucide-react';
 
 export default function App() {
     const [session, setSession] = useState(null);
     const [currentPage, setCurrentPage] = useState('loading');
     const [selectedDeckId, setSelectedDeckId] = useState(null);
+    const [nudgesEnabled, setNudgesEnabled] = useState(true);
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {    
@@ -21,7 +22,7 @@ export default function App() {
             setCurrentPage(session ? 'home' : 'auth');
         });
 
-        const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             setCurrentPage(session ? 'home' : 'auth');
         });
@@ -43,13 +44,16 @@ export default function App() {
 
     return (
         <div>
-            <div className="header">LangNudge
-                <House onClick={() => navigate('home')} className='my-icon' style={{position: 'absolute', right: '10px', marginTop: '3px', color: 'white'}}/>
-                <SettingsIcon onClick={() => navigate('settings')} className='my-icon' style={{position: 'absolute', right: '40px', marginTop: '3px', color: 'white'}}/>
-                <label className='switch'>
-                    <input type='checkbox' />
-                    <span className='slider round'></span>
-                </label>
+            <div className="header">
+                <span>LangNudge</span>
+                <div className='header-actions'>
+                    {nudgesEnabled
+                        ? <Bell onClick={() => setNudgesEnabled(false)} className='header-icon'/>
+                        : <BellOff onClick={() => setNudgesEnabled(true)} className='header-icon' style={{opacity: 0.6}}/>
+                    }
+                    <SettingsIcon onClick={() => navigate('settings')} className='header-icon'/>
+                    <House onClick={() => navigate('home')} className='header-icon'/>
+                </div>
             </div>
             <div className='app-container'>
                 {currentPage === 'auth' && <Auth onLoginSuccess={() => navigate('home')} />}

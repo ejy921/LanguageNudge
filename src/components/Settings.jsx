@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { ChevronDown } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export default function Settings() {
 
-    const [activeFrequency, setActiveFrequency] = useState(null);
+    const [nudgeStyle, setNudgeStyle] = useState('flashcard'); // flashcard or quiz
+    const [activeFrequency, setActiveFrequency] = useState('60');
+    const [blockedSites, setBlockedSites] = useState(['linkedin.com', 'pinterest.com']);
+    const [siteInput, setSiteInput] = useState('');
+
+    const TIME_OPTIONS = [
+        { label: '15m', value: 15 },
+        { label: '30m', value: 30 },
+        { label: '1h',  value: 60 },
+        { label: '2h',  value: 120 },
+        { label: '4h',  value: 240 },
+        { label: '8h',  value: 480 },
+        { label: '24h', value: 1440 },
+    ];   
 
     const handleSignOut = async () => {
         const { error } = await supabase.auth.signOut();
@@ -13,49 +26,72 @@ export default function Settings() {
 
     return (
         <div className='settings'>
-            <h2>Settings</h2>
-            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                <div className='style-option'>
-                    <h4>Flashcard</h4>
-                    <div className='style-box'>
-                        <img className='example-img' src='images/flashcard.png' alt='flashcard'></img>
-                    </div>
+            <h3>Settings</h3>
+            <div className='container-box'>
+                <p className='settings-text'>Nudge style</p>
+                <div className='segmented-control' style={{marginBottom: '15px', display: 'inline-flex'}}>
+                    <button
+                        className={`segment ${nudgeStyle === 'flashcard' ? 'segment-active' : ''}`}
+                        onClick={() => setNudgeStyle('flashcard')}>
+                        Flashcard
+                    </button>
+                    <button
+                        className={`segment ${nudgeStyle === 'quiz' ? 'segment-active' : ''}`}
+                        onClick={() => setNudgeStyle('quiz')}>
+                        Quiz
+                    </button>
                 </div>
-                <div className='style-option'>
-                    <h4>Quiz</h4>
-                    <div className='style-box'>
-                        <img className='example-img' src='images/quiz.png' alt='quiz'></img>
-                    </div>
+
+                <p className='settings-text'>Nudge frequency</p>
+                <div className='segmented-control' style={{display: 'inline-flex'}}>
+                    {TIME_OPTIONS.map((option) => (
+                        <button
+                            key={option.value}
+                            className={`segment ${activeFrequency === option.value ? 'segment-active' : ''}`}
+                            onClick={() => setActiveFrequency(option.value)}
+                            style={{marginBlock: '0px', marginInline: '0px'}}
+                        >
+                            {option.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            
+            <div className='container-box'>
+                <p className='settings-text'>Blocked Pages</p>
+                <div className='blocked-sites'>
+                    {blockedSites.map((site) => (
+                        <span key={site} className='site-chip'>
+                            {site}
+                            <X
+                                className='chip-remove'
+                                size={12}
+                                onClick={() => setBlockedSites(blockedSites.filter((s) => s !== site))}
+                            />
+                        </span>
+                    ))}
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const trimmed = siteInput.trim();
+                        if (trimmed && !blockedSites.includes(trimmed)) {
+                            setBlockedSites([...blockedSites, trimmed]);
+                            setSiteInput('');
+                        }}}>
+                        <input
+                            className='site-input'
+                            type='text'
+                            placeholder='Add website...'
+                            value={siteInput}
+                            onChange={(e) => setSiteInput(e.target.value)}
+                        />
+                    </form>
                 </div>
             </div>
 
-            <div className='container-box'>
-                <div className='settings-row'>
-                    <p className='settings-text'>Nudge frequency</p>
-                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: '0px', cursor: 'pointer', borderStyle: 'solid', borderWidth: '1px', borderColor: '#ccc', borderRadius: '5px', padding: '2px 5px'}}> 
-                        <p>Freq</p>
-                        <ChevronDown style={{width: '12px', height: '12px'}} className='my-icon'/>
-                        {activeFrequency && (
-                            <div className='dropdown-content' style={{alignItems: 'stretch', textAlign: 'left', right: '60px', top: '90px'}}>
-                                <p>Hello</p>
-                                <p>World</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <div className='settings-row'>
-                    <p className='settings-text'>'Blocked' Pages</p>
-                </div>
-                <div className='settings-row'>
-                    <p className='settings-text'>Example sentences</p>
-                    <label className='switch'>
-                        <input type='checkbox' />
-                        <span className='slider round'></span>
-                    </label>
-                </div>
+            <div className='settings-actions'>
+                <button className='btn-signout' onClick={handleSignOut}>Sign Out</button>
+                <button className='btn-delete'>Delete Account</button>
             </div>
-            <button onClick={handleSignOut} style={{ backgroundColor: 'grey', padding: '8px' }}>Sign Out</button>
-            <button style={{ backgroundColor: 'red', padding: '8px' }}>Delete Account</button>
         </div>
     )
 }

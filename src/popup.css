@@ -17,11 +17,26 @@ body {
 .header {
     background: #0dd6bb;
     color: white;
-    padding: 10px;
+    padding: 10px 12px;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: 16px;
     font-weight: bold;
     margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-icon {
+    color: white;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
 }
 
 .welcome-page {
@@ -164,28 +179,24 @@ input {
 }
 
 .container-box {
-    border: #cfcfcf;
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 5px;
-    margin: 10px;
+    border: 2px solid #cfcfcf;
+    border-radius: 8px;
+    margin: 8px 6px;
     padding: 8px;
     text-align: left;
 }
 
-.settings-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-inline: 0px;
-    padding-block: 0px;
+.settings {
+    text-align: left;
+    padding: 0 4px;
 }
 
-.settings-text {
-    font-size: 5px;
-    margin-block: 1px;
-    padding: 0px;
+.container-box .settings-text {
+    font-size: 12px;
+    margin-block: 0px;
+    padding-inline: 0px;
+    padding-left: 0px;
+    padding-bottom: 10px;
 }
 
 .container-box p,
@@ -234,52 +245,105 @@ input {
 }
 
 
-
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 30px;
-    height: 17px;
-    border-radius: 34px;
-    margin-top: 2px;
-}
-.switch input { 
-    opacity: 0;
-    width: 0;
-    height: 0;
+.segmented-control {
+    display: flex;
+    flex-wrap: wrap;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
 }
 
-.slider {
-    position: absolute;
+.segment {
+    all: unset;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    border-radius: 6px;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    -webkit-transition: .4s;
-    transition: .4s;
-    border-radius: 15px;
+    text-align: center;
+    transition: all 0.2s ease;
+    margin: 0;
 }
 
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 14px;
-    width: 14px;
-    left: 2px;
-    bottom: 1.5px;
+.segment:hover {
+    color: #555;
+}
+
+.segment-active {
     background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
-    border-radius: 50%;
+    color: #333;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-input:checked + .slider {
-    background-color: #0dd6bb;
+.blocked-sites {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+    padding: 4px 0;
 }
 
-input:checked + .slider:before {
-    transform: translateX(12px);
+.site-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background-color: #f0f0f0;
+    border-radius: 12px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #333;
+}
+
+.chip-remove {
+    cursor: pointer;
+    color: #999;
+    flex-shrink: 0;
+}
+
+.chip-remove:hover {
+    color: #333;
+}
+
+.site-input {
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 3px 8px;
+    font-size: 10px;
+    width: 80px;
+    outline: none;
+    margin: 0;
+}
+
+.site-input:focus {
+    border-color: #0dd6bb;
+}
+
+.settings-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 0 6px;
+}
+
+.btn-signout {
+    background-color: #666;
+    font-size: 12px;
+    padding: 7px 14px;
+}
+
+.btn-signout:hover {
+    background-color: #555;
+}
+
+.btn-delete {
+    background-color: #e53935;
+    font-size: 12px;
+    padding: 7px 14px;
+}
+
+.btn-delete:hover {
+    background-color: #c62828;
 }
