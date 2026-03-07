@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { CirclePlus, Trash2 } from 'lucide-react';
 import { createDeck } from '../utils/deck';

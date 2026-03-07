@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '../supabaseClient'; 
 
 export default function Auth({ onLoginSuccess }) {
@@ -9,8 +9,6 @@ export default function Auth({ onLoginSuccess }) {
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    const [error, setError] = useState(null);
-    
     const handleAuth = async (e) => {
         e.preventDefault();
         setErrorMessage('');
