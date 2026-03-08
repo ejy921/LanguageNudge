@@ -1,3 +1,5 @@
+import { supabase } from '../supabaseClient';
+
 const NUDGE_BASE_POINT = 1.6;
 const REVIEW_BASE_POINT = 2.2;
 
@@ -10,7 +12,7 @@ const HOUR_UNIT = 60 * 60 * 1000;
 // @param {number} review_time - timestamp of when card was last reviewed
 // @param {number} streak - current correct answer streak
 // @param {string} mode - 'nudge' or 'activereview'
-export function nextCard(score, review_time, streak, mode, list_size) {
+export function nextReview(score, review_time, streak, mode, list_size) {
     let points = mode === 'nudge' ? NUDGE_BASE_POINT : REVIEW_BASE_POINT;
     let added_hours = 0;
 
@@ -28,4 +30,20 @@ export function nextCard(score, review_time, streak, mode, list_size) {
 
     return { next_review, streak };
     
+}
+
+export async function nextCard({deckId}) {
+    const { data, error } = await supabase
+        .from('vocabs')
+        .select('*')
+        .eq('deck_id', deckId)
+        .order('next_review', { ascending: true, nullsFirst: true })
+        .limit(1)
+        .single();
+    if (error) {
+        console.error('Error fetching next card:', error);
+        return null;
+    } else {
+        return data;
+    }
 }

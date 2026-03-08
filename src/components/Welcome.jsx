@@ -3,7 +3,7 @@ import { Upload } from 'lucide-react';
 export default function Welcome() {
     return (
         <div className='welcome-page'>
-            <h2>Let's get started!</h2>
+            <h2>Let&apos;s get started!</h2>
             <p>Upload your vocab file:</p>
             <button id="uploadBtn">Upload
                 <Upload/>

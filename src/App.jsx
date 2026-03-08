@@ -10,14 +10,33 @@ import NudgeCard from './components/NudgeCard';
 import NudgeQuiz from './components/NudgeQuiz';
 import { Settings as SettingsIcon, House, Bell, BellOff } from 'lucide-react';
 
+const DEFAULT_PREFERENCES = {
+    nudgeStyle: 'flashcard',
+    nudgeFrequency: 60,
+    blockedSites: ['netflix.com'],
+    flashcardStartSide: 'front',
+};
+
 export default function App() {
     const [session, setSession] = useState(null);
     const [currentPage, setCurrentPage] = useState('loading');
     const [selectedDeckId, setSelectedDeckId] = useState(null);
     const [nudgesEnabled, setNudgesEnabled] = useState(true);
+    const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {    
+        chrome.storage.sync.get(DEFAULT_PREFERENCES, (result) => {
+            setPreferences(result);
+        });
+    }, []);
+
+    const updatePreference = (key, value) => {
+        setPreferences(prev => ({ ...prev, [key]: value }));
+        chrome.storage.sync.set({ [key]: value });
+    };
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setCurrentPage(session ? 'home' : 'auth');
         });
@@ -38,7 +57,6 @@ export default function App() {
     };
 
     if (currentPage === 'loading') {
-        // TODO: Replace with a proper loading spinner
         return <p>Loading...</p>;
     }
 
@@ -59,8 +77,8 @@ export default function App() {
                 {currentPage === 'auth' && <Auth onLoginSuccess={() => navigate('home')} />}
                 {currentPage === 'home' && (<Home session={session} navigate={navigate} />)}
                 {currentPage === 'vocabs' && <Vocabs deckId={selectedDeckId} navigate={navigate} />}
-                {currentPage === 'settings' && <Settings navigate={navigate} />}
-                {currentPage === 'review' && <NudgeCard deckId={selectedDeckId} mode='review' navigate={navigate} />}
+                {currentPage === 'settings' && <Settings navigate={navigate} preferences={preferences} updatePreference={updatePreference} />}
+                {currentPage === 'review' && <NudgeCard deckId={selectedDeckId} mode='review' navigate={navigate} preferences={preferences} />}
                 {currentPage === 'quiz' && <NudgeQuiz deckId={selectedDeckId} mode='quiz' navigate={navigate} />}
             </div>
         </div>

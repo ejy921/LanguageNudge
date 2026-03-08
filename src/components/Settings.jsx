@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { X } from 'lucide-react';
 
-export default function Settings() {
+export default function Settings({ preferences, updatePreference }) {
 
-    const [nudgeStyle, setNudgeStyle] = useState('flashcard'); // flashcard or quiz
-    const [activeFrequency, setActiveFrequency] = useState('60');
-    const [blockedSites, setBlockedSites] = useState(['linkedin.com', 'pinterest.com']);
+    const { nudgeStyle, nudgeFrequency, blockedSites, flashcardStartSide } = preferences;
     const [siteInput, setSiteInput] = useState('');
 
     const TIME_OPTIONS = [
@@ -27,18 +25,24 @@ export default function Settings() {
     return (
         <div className='settings'>
             <h3>Settings</h3>
+
             <div className='container-box'>
                 <p className='settings-text'>Nudge style</p>
                 <div className='segmented-control' style={{marginBottom: '15px', display: 'inline-flex'}}>
                     <button
                         className={`segment ${nudgeStyle === 'flashcard' ? 'segment-active' : ''}`}
-                        onClick={() => setNudgeStyle('flashcard')}>
+                        onClick={() => updatePreference('nudgeStyle', 'flashcard')}>
                         Flashcard
                     </button>
                     <button
                         className={`segment ${nudgeStyle === 'quiz' ? 'segment-active' : ''}`}
-                        onClick={() => setNudgeStyle('quiz')}>
+                        onClick={() => updatePreference('nudgeStyle', 'quiz')}>
                         Quiz
+                    </button>
+                    <button
+                        className={`segment ${nudgeStyle === 'random' ? 'segment-active' : ''}`}
+                        onClick={() => updatePreference('nudgeStyle', 'random')}>
+                        Random
                     </button>
                 </div>
 
@@ -47,8 +51,8 @@ export default function Settings() {
                     {TIME_OPTIONS.map((option) => (
                         <button
                             key={option.value}
-                            className={`segment ${activeFrequency === option.value ? 'segment-active' : ''}`}
-                            onClick={() => setActiveFrequency(option.value)}
+                            className={`segment ${nudgeFrequency === option.value ? 'segment-active' : ''}`}
+                            onClick={() => updatePreference('nudgeFrequency', option.value)}
                             style={{marginBlock: '0px', marginInline: '0px'}}
                         >
                             {option.label}
@@ -66,7 +70,7 @@ export default function Settings() {
                             <X
                                 className='chip-remove'
                                 size={12}
-                                onClick={() => setBlockedSites(blockedSites.filter((s) => s !== site))}
+                                onClick={() => updatePreference('blockedSites', blockedSites.filter((s) => s !== site))}
                             />
                         </span>
                     ))}
@@ -74,7 +78,7 @@ export default function Settings() {
                         e.preventDefault();
                         const trimmed = siteInput.trim();
                         if (trimmed && !blockedSites.includes(trimmed)) {
-                            setBlockedSites([...blockedSites, trimmed]);
+                            updatePreference('blockedSites', [...blockedSites, trimmed]);
                             setSiteInput('');
                         }}}>
                         <input
@@ -85,6 +89,27 @@ export default function Settings() {
                             onChange={(e) => setSiteInput(e.target.value)}
                         />
                     </form>
+                </div>
+            </div>
+
+            <div className='container-box'>
+                <p className='settings-text'>Flashcard start side</p>
+                <div className='segmented-control' style={{display: 'inline-flex'}}>
+                    <button
+                        className={`segment ${flashcardStartSide === 'front' ? 'segment-active' : ''}`}
+                        onClick={() => updatePreference('flashcardStartSide', 'front')}>
+                        Front
+                    </button>
+                    <button
+                        className={`segment ${flashcardStartSide === 'back' ? 'segment-active' : ''}`}
+                        onClick={() => updatePreference('flashcardStartSide', 'back')}>
+                        Back
+                    </button>
+                    <button
+                        className={`segment ${flashcardStartSide === 'random' ? 'segment-active' : ''}`}
+                        onClick={() => updatePreference('flashcardStartSide', 'random')}>
+                        Random
+                    </button>
                 </div>
             </div>
 

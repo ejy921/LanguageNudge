@@ -174,9 +174,9 @@ export default function Vocabs({ deckId, navigate }) {
                     <ChevronDown style={{width: '15px', height: '15px'}} className='my-icon' onClick={(e) => toggleSortbyMenu(e)}/>
                     {activeSortbyId === deckId && (
                         <div className='dropdown-content' style={{alignItems: 'stretch', textAlign: 'left', right: '60px', top: '90px'}}>
-                            <p onClick={(e) => { setSortBy('name'); setActiveSortbyId(null); }}>Name</p>
-                            <p onClick={(e) => { setSortBy('newest'); setActiveSortbyId(null); }}>Newest</p>
-                            <p onClick={(e) => { setSortBy('oldest'); setActiveSortbyId(null); }}>Oldest</p>
+                            <p onClick={() => { setSortBy('name'); setActiveSortbyId(null); }}>Name</p>
+                            <p onClick={() => { setSortBy('newest'); setActiveSortbyId(null); }}>Newest</p>
+                            <p onClick={() => { setSortBy('oldest'); setActiveSortbyId(null); }}>Oldest</p>
                         </div>
                     )}
                 </div>
