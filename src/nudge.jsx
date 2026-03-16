@@ -9,7 +9,7 @@ const DEFAULT_PREFERENCES = {
     flashcardStartSide: 'front',
 };
 
-function NudgeWindow() {
+export default function NudgeWindow() {
     const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
     const deckId = new URLSearchParams(window.location.search).get('deckId');
 

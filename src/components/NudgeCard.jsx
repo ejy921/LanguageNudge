@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { nextCard, resetQueue, nextReview } from '../utils/vocabQueue';
@@ -18,13 +18,11 @@ export default function NudgeCard({ deckId, preferences, navigate }) {
     }, [deckId]);
 
     // flashcardStartSide dependent on user preference
-    const startSideRef = useRef(null);
-    if (startSideRef.current === null) {
-        startSideRef.current = flashcardStartSide === 'random'
+    const [startSide, setStartSide] = useState(() =>
+        flashcardStartSide === 'random'
             ? (Math.random() < 0.5 ? 'front' : 'back')
-            : flashcardStartSide;
-    }
-    const startSide = startSideRef.current;
+            : flashcardStartSide
+    );
 
     if (!currentCard) return <p>Loading...</p>;
 
@@ -38,10 +36,11 @@ export default function NudgeCard({ deckId, preferences, navigate }) {
             } else {
                 const { card, listSize } = result;
                 const { next_review, streak } = nextReview(score, currentCard.review_time, currentCard.streak, 'nudge', listSize);
-                startSideRef.current = flashcardStartSide === 'random'
+                setStartSide(flashcardStartSide === 'random'
                     ? (Math.random() < 0.5 ? 'front' : 'back')
-                    : flashcardStartSide;
+                    : flashcardStartSide);
                 setCurrentCard(card);
+                // update streak and next_review in Supabase
                 const { error } = supabase
                     .from('vocab')
                     .update({ next_review, streak })
@@ -56,9 +55,9 @@ export default function NudgeCard({ deckId, preferences, navigate }) {
         setDeckFinished(false);
         nextCard({ deckId }).then(result => {
             if (result) {
-                startSideRef.current = flashcardStartSide === 'random'
+                setStartSide(flashcardStartSide === 'random'
                     ? (Math.random() < 0.5 ? 'front' : 'back')
-                    : flashcardStartSide;
+                    : flashcardStartSide);
                 setCurrentCard(result.card);
             }
         });

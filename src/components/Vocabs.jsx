@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { CirclePlus, Trash2, EllipsisVertical, ChevronDown } from 'lucide-react';
 import { sortVocabs, getVocabsCacheKey } from '../utils/vocabUtils';
@@ -15,40 +15,34 @@ export default function Vocabs({ deckId, navigate }) {
 
     const [searchQuery, setSearchQuery] = useState('');
 
-    const fetchDeckName = useCallback(async (id) => {
-        const { data, error } = await supabase
-            .from('decks')
-            .select('name')
-            .eq('id', id)
-            .single();
-        if (!error && data) {
-            setDeckName(data.name);
-        }
-    }, []);
+    useEffect(() => {
+        async function fetchData() {
+            const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
+            if (cachedVocabs) {
+                const parsed = JSON.parse(cachedVocabs);
+                if (Array.isArray(parsed)) {
+                    setVocabs(parsed);
+                }
+            }
 
-    const fetchVocabs = useCallback(async () => {
-        const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
-        if (cachedVocabs) {
-            const parsed = JSON.parse(cachedVocabs);
-            if (Array.isArray(parsed)) {
-                setVocabs(parsed);
+            const [vocabResult, deckResult] = await Promise.all([
+                supabase.from('vocab').select('*').eq('deck_id', deckId),
+                supabase.from('decks').select('name').eq('id', deckId).single(),
+            ]);
+
+            if (vocabResult.error) {
+                console.error('Error fetching vocabs:', vocabResult.error);
+            } else {
+                setVocabs(vocabResult.data || []);
+            }
+
+            if (!deckResult.error && deckResult.data) {
+                setDeckName(deckResult.data.name);
             }
         }
-        const { data, error } = await supabase
-            .from('vocab')
-            .select('*')
-            .eq('deck_id', deckId);
-        if (error) {
-            console.error('Error fetching vocabs:', error);
-        } else {
-            setVocabs(data || []);
-        }
-    }, [deckId]);
 
-    useEffect(() => {
-        fetchVocabs();
-        fetchDeckName(deckId);
-    }, [deckId, fetchVocabs, fetchDeckName]);
+        fetchData();
+    }, [deckId]);
 
     useEffect(() => {
         const handleClickOutside = () => setActiveMenuId(null);
