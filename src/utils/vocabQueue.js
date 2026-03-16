@@ -12,6 +12,7 @@ const HOUR_UNIT = 60 * 60 * 1000;
 // @param {number} review_time - timestamp of when card was last reviewed
 // @param {number} streak - current correct answer streak
 // @param {string} mode - 'nudge' or 'activereview'
+// @param {number} list_size - number of cards in the deck (used for penalty calculation on wrong answers)
 export function nextReview(score, review_time, streak, mode, list_size) {
     let points = mode === 'nudge' ? NUDGE_BASE_POINT : REVIEW_BASE_POINT;
     let added_hours = 0;
@@ -32,18 +33,40 @@ export function nextReview(score, review_time, streak, mode, list_size) {
     
 }
 
+const seenCards = new Map();   // deckId -> Set of card IDs
+const cachedCards = new Map(); // deckId -> array of cards
+
+export function resetQueue(deckId) {
+    seenCards.delete(deckId);
+    cachedCards.delete(deckId);
+}
+
 export async function nextCard({deckId}) {
-    const { data, error } = await supabase
-        .from('vocabs')
-        .select('*')
-        .eq('deck_id', deckId)
-        .order('next_review', { ascending: true, nullsFirst: true })
-        .limit(1)
-        .single();
-    if (error) {
-        console.error('Error fetching next card:', error);
-        return null;
-    } else {
-        return data;
+    if (!seenCards.has(deckId)) {
+        seenCards.set(deckId, new Set());
     }
+    const seen = seenCards.get(deckId);
+
+    // Only fetch from Supabase if we haven't cached this deck yet
+    if (!cachedCards.has(deckId)) {
+        const { data, error } = await supabase
+            .from('vocab')
+            .select('*')
+            .eq('deck_id', deckId)
+            .order('next_review', { ascending: true, nullsFirst: true });
+
+        if (error) {
+            console.error('Error fetching next card:', error);
+            return null;
+        }
+        cachedCards.set(deckId, data);
+    }
+
+    const cards = cachedCards.get(deckId);
+    const unseen = cards.filter(card => !seen.has(card.id));
+    if (unseen.length === 0) return null;
+
+    const card = unseen[0];
+    seen.add(card.id);
+    return { card, listSize: cards.length };
 }

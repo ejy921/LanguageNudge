@@ -31,7 +31,9 @@ export default function App() {
     }, []);
 
     const updatePreference = (key, value) => {
+        // updates just the changed key in state
         setPreferences(prev => ({ ...prev, [key]: value }));
+        // persists update to chrome storage
         chrome.storage.sync.set({ [key]: value });
     };
 
@@ -56,6 +58,10 @@ export default function App() {
         }
     };
 
+    useEffect(() => {
+        document.body.style.width = (currentPage === 'review' || currentPage === 'quiz') ? '250px' : '300px';
+    }, [currentPage]);
+
     if (currentPage === 'loading') {
         return <p>Loading...</p>;
     }
@@ -78,8 +84,8 @@ export default function App() {
                 {currentPage === 'home' && (<Home session={session} navigate={navigate} />)}
                 {currentPage === 'vocabs' && <Vocabs deckId={selectedDeckId} navigate={navigate} />}
                 {currentPage === 'settings' && <Settings navigate={navigate} preferences={preferences} updatePreference={updatePreference} />}
-                {currentPage === 'review' && <NudgeCard deckId={selectedDeckId} mode='review' navigate={navigate} preferences={preferences} />}
-                {currentPage === 'quiz' && <NudgeQuiz deckId={selectedDeckId} mode='quiz' navigate={navigate} />}
+                {currentPage === 'review' && <NudgeCard deckId={selectedDeckId} preferences={preferences} navigate={navigate} />}
+                {currentPage === 'quiz' && <NudgeQuiz deckId={selectedDeckId} preferences={preferences} navigate={navigate}/>}
             </div>
         </div>
     );

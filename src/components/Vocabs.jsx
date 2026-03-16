@@ -5,6 +5,7 @@ import { sortVocabs, getVocabsCacheKey } from '../utils/vocabUtils';
 
 export default function Vocabs({ deckId, navigate }) {
     const [vocabs, setVocabs] = useState([]);
+    const [deckName, setDeckName] = useState('');
     const [popup, setPopup] = useState({ type: null, vocab: null });
     const [formData, setFormData] = useState({ front: '', back: '' });
 
@@ -16,6 +17,7 @@ export default function Vocabs({ deckId, navigate }) {
 
     useEffect(() => {
         fetchVocabs(deckId);
+        fetchDeckName(deckId);
         console.log('Rendering Vocabs Component. Vocabs:', vocabs);
         const handleClickOutside = () => setActiveMenuId(null);
         document.addEventListener('click', handleClickOutside);
@@ -30,6 +32,17 @@ export default function Vocabs({ deckId, navigate }) {
             localStorage.setItem(getVocabsCacheKey(deckId), JSON.stringify(vocabs));
         }
     }, [vocabs, deckId]);
+
+    async function fetchDeckName(id) {
+        const { data, error } = await supabase
+            .from('decks')
+            .select('name')
+            .eq('id', id)
+            .single();
+        if (!error && data) {
+            setDeckName(data.name);
+        }
+    }
 
     async function fetchVocabs() {
         const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
@@ -167,6 +180,7 @@ export default function Vocabs({ deckId, navigate }) {
     
     return (
         <div className='vocabs' style={{display: 'flex', flexDirection: 'column'}}>
+            <h3 style={{ textAlign: 'left', paddingLeft: '10px', margin: '5px 0' }}>{deckName}</h3>
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '90%', justifyContent: 'space-between', margin: '10px', gap: '12px' }}>
                 <input type='text' className='text-input' placeholder='Search vocab...' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                 <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: '0px', cursor: 'pointer', borderStyle: 'solid', borderWidth: '1px', borderColor: 'lightgray', borderRadius: '4px', padding: '2px', minWidth: '50px' }}>

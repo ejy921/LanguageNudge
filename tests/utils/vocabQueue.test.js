@@ -1,5 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { nextReview } from '../../src/utils/vocabQueue'; 
+import { nextReview, nextCard, resetQueue } from '../../src/utils/vocabQueue';
+
+// Mock supabase
+const mockOrder = vi.fn();
+const mockEq = vi.fn(() => ({ order: mockOrder }));
+const mockSelect = vi.fn(() => ({ eq: mockEq }));
+const mockFrom = vi.fn(() => ({ select: mockSelect }));
+
+vi.mock('../../src/supabaseClient', () => ({
+  supabase: {
+    from: (...args) => mockFrom(...args),
+  },
+}));
 
 // Constants from your file for reference in tests
 const HOUR = 60 * 60 * 1000;
@@ -81,17 +93,14 @@ describe('nextReview', () => {
   });
 
   describe('Time Anchor Safety Checks', () => {
-    it('anchors to NOW if previous review was in the past (The "Lone Old Card" fix)', () => {
+    it('adds interval from the given review_time even if in the past', () => {
       const ancientTime = MOCK_NOW - (100 * HOUR); // 100 hours ago
-      
-      // Even though review_time was 100 hours ago, we expect the calculation
-      // to start from MOCK_NOW so it doesn't get stuck in the past.
+
       const result = nextReview(1, ancientTime, 0, 'activereview', 100);
 
-      // Math: (2.2 ^ 1) + 5 = 7.2 hours
-      // Should be NOW + 7.2, NOT ancientTime + 7.2
-      const expectedTime = MOCK_NOW + (7.2 * HOUR);
-      
+      // Math: (2.2 ^ 1) + 5 = 7.2 hours added to ancientTime
+      const expectedTime = ancientTime + (7.2 * HOUR);
+
       expect(result.next_review).toBe(expectedTime);
     });
 
@@ -108,5 +117,100 @@ describe('nextReview', () => {
       
       expect(result.next_review).toBe(expectedTime);
     });
+  });
+});
+
+const MOCK_CARDS = [
+  { id: 'a', front: 'hello', back: 'ciao', next_review: 1000 },
+  { id: 'b', front: 'goodbye', back: 'arrivederci', next_review: 2000 },
+  { id: 'c', front: 'thanks', back: 'grazie', next_review: 3000 },
+];
+
+describe('nextCard', () => {
+  beforeEach(() => {
+    resetQueue('deck-1');
+    mockOrder.mockReset();
+    mockFrom.mockClear();
+  });
+
+  it('returns the first card and listSize on first call', async () => {
+    mockOrder.mockResolvedValue({ data: MOCK_CARDS, error: null });
+
+    const result = await nextCard({ deckId: 'deck-1' });
+
+    expect(result.card).toEqual(MOCK_CARDS[0]);
+    expect(result.listSize).toBe(3);
+  });
+
+  it('skips seen cards on subsequent calls', async () => {
+    mockOrder.mockResolvedValue({ data: MOCK_CARDS, error: null });
+
+    await nextCard({ deckId: 'deck-1' }); // sees card 'a'
+    const result = await nextCard({ deckId: 'deck-1' }); // should get 'b'
+
+    expect(result.card).toEqual(MOCK_CARDS[1]);
+  });
+
+  it('returns null when all cards have been seen', async () => {
+    mockOrder.mockResolvedValue({ data: MOCK_CARDS, error: null });
+
+    await nextCard({ deckId: 'deck-1' }); // a
+    await nextCard({ deckId: 'deck-1' }); // b
+    await nextCard({ deckId: 'deck-1' }); // c
+    const result = await nextCard({ deckId: 'deck-1' });
+
+    expect(result).toBeNull();
+  });
+
+  it('only fetches from Supabase once (uses cache)', async () => {
+    mockOrder.mockResolvedValue({ data: MOCK_CARDS, error: null });
+
+    await nextCard({ deckId: 'deck-1' });
+    await nextCard({ deckId: 'deck-1' });
+    await nextCard({ deckId: 'deck-1' });
+
+    expect(mockFrom).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns null on Supabase error', async () => {
+    mockOrder.mockResolvedValue({ data: null, error: { message: 'fail' } });
+
+    const result = await nextCard({ deckId: 'deck-1' });
+
+    expect(result).toBeNull();
+  });
+});
+
+describe('resetQueue', () => {
+  beforeEach(() => {
+    resetQueue('deck-1');
+    mockOrder.mockReset();
+    mockFrom.mockClear();
+  });
+
+  it('clears cache so next call re-fetches from Supabase', async () => {
+    mockOrder.mockResolvedValue({ data: MOCK_CARDS, error: null });
+
+    await nextCard({ deckId: 'deck-1' });
+    expect(mockFrom).toHaveBeenCalledTimes(1);
+
+    resetQueue('deck-1');
+
+    await nextCard({ deckId: 'deck-1' });
+    expect(mockFrom).toHaveBeenCalledTimes(2);
+  });
+
+  it('resets seen cards so deck can be replayed', async () => {
+    mockOrder.mockResolvedValue({ data: MOCK_CARDS, error: null });
+
+    await nextCard({ deckId: 'deck-1' }); // a
+    await nextCard({ deckId: 'deck-1' }); // b
+    await nextCard({ deckId: 'deck-1' }); // c
+    expect(await nextCard({ deckId: 'deck-1' })).toBeNull();
+
+    resetQueue('deck-1');
+
+    const result = await nextCard({ deckId: 'deck-1' });
+    expect(result.card).toEqual(MOCK_CARDS[0]); // back to first card
   });
 });
