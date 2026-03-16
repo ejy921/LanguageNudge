@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { nextCard, resetQueue, nextReview } from '../utils/vocabQueue';
@@ -18,13 +18,10 @@ export default function NudgeCard({ deckId, preferences, navigate }) {
     }, [deckId]);
 
     // flashcardStartSide dependent on user preference
-    const [startSide, setStartSide] = useState(flashcardStartSide);
-    useEffect(() => {
-        setStartSide(
-            flashcardStartSide === 'random'
-                ? (Math.random() < 0.5 ? 'front' : 'back')
-                : flashcardStartSide
-        );
+    const startSide = useMemo(() => {
+        return flashcardStartSide === 'random'
+            ? (Math.random() < 0.5 ? 'front' : 'back')
+            : flashcardStartSide;
     }, [currentCard, flashcardStartSide]);
 
     if (!currentCard) return <p>Loading...</p>;

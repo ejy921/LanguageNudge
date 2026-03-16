@@ -15,10 +15,40 @@ export default function Vocabs({ deckId, navigate }) {
 
     const [searchQuery, setSearchQuery] = useState('');
 
+    const fetchDeckName = async (id) => {
+        const { data, error } = await supabase
+            .from('decks')
+            .select('name')
+            .eq('id', id)
+            .single();
+        if (!error && data) {
+            setDeckName(data.name);
+        }
+    };
+
+    const fetchVocabs = async () => {
+        const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
+        if (cachedVocabs) {
+            const parsed = JSON.parse(cachedVocabs);
+            if (Array.isArray(parsed)) {
+                setVocabs(JSON.parse(cachedVocabs));
+            }
+        }
+
+        const { data, error } = await supabase
+            .from('vocab')
+            .select('*')
+            .eq('deck_id', deckId);
+        if (error) {
+            console.error('Error fetching vocabs:', error);
+        } else {
+            setVocabs(data || []);
+        }
+    };
+
     useEffect(() => {
         fetchVocabs(deckId);
         fetchDeckName(deckId);
-        console.log('Rendering Vocabs Component. Vocabs:', vocabs);
         const handleClickOutside = () => setActiveMenuId(null);
         document.addEventListener('click', handleClickOutside);
         return () => {
@@ -32,38 +62,6 @@ export default function Vocabs({ deckId, navigate }) {
             localStorage.setItem(getVocabsCacheKey(deckId), JSON.stringify(vocabs));
         }
     }, [vocabs, deckId]);
-
-    async function fetchDeckName(id) {
-        const { data, error } = await supabase
-            .from('decks')
-            .select('name')
-            .eq('id', id)
-            .single();
-        if (!error && data) {
-            setDeckName(data.name);
-        }
-    }
-
-    async function fetchVocabs() {
-        const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
-        if (cachedVocabs) {
-            const parsed = JSON.parse(cachedVocabs);
-            if (Array.isArray(parsed)) {
-                setVocabs(JSON.parse(cachedVocabs));
-            }
-        }
-        console.log('Fetching vocabs for deckId:', deckId);
-
-        const { data, error } = await supabase
-            .from('vocab')
-            .select('*')
-            .eq('deck_id', deckId);
-        if (error) {
-            console.error('Error fetching vocabs:', error);
-        } else {
-            setVocabs(data || []);
-        }
-    };
 
     const toggleMenu = (e, vocabId) => {
         e.stopPropagation();
