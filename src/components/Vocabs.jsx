@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { CirclePlus, Trash2, EllipsisVertical, ChevronDown } from 'lucide-react';
 import { sortVocabs, getVocabsCacheKey } from '../utils/vocabUtils';
@@ -15,7 +15,7 @@ export default function Vocabs({ deckId, navigate }) {
 
     const [searchQuery, setSearchQuery] = useState('');
 
-    const fetchDeckName = async (id) => {
+    const fetchDeckName = useCallback(async (id) => {
         const { data, error } = await supabase
             .from('decks')
             .select('name')
@@ -24,17 +24,16 @@ export default function Vocabs({ deckId, navigate }) {
         if (!error && data) {
             setDeckName(data.name);
         }
-    };
+    }, []);
 
-    const fetchVocabs = async () => {
+    const fetchVocabs = useCallback(async () => {
         const cachedVocabs = localStorage.getItem(getVocabsCacheKey(deckId));
         if (cachedVocabs) {
             const parsed = JSON.parse(cachedVocabs);
             if (Array.isArray(parsed)) {
-                setVocabs(JSON.parse(cachedVocabs));
+                setVocabs(parsed);
             }
         }
-
         const { data, error } = await supabase
             .from('vocab')
             .select('*')
@@ -44,17 +43,17 @@ export default function Vocabs({ deckId, navigate }) {
         } else {
             setVocabs(data || []);
         }
-    };
+    }, [deckId]);
 
     useEffect(() => {
-        fetchVocabs(deckId);
+        fetchVocabs();
         fetchDeckName(deckId);
         const handleClickOutside = () => setActiveMenuId(null);
         document.addEventListener('click', handleClickOutside);
         return () => {
             document.removeEventListener('click', handleClickOutside);
         };
-    }, [deckId]);
+    }, [deckId, fetchVocabs, fetchDeckName]);
 
     // watch state and sync to local storage
     useEffect(() => {
@@ -96,6 +95,7 @@ export default function Vocabs({ deckId, navigate }) {
             console.error('Error deleting card:', error);
         } else {
             localStorage.removeItem(getVocabsCacheKey(deckId));
+            closePopup();
             if (navigate) {
                 navigate('home');
             }

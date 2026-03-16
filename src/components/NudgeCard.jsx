@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { nextCard, resetQueue, nextReview } from '../utils/vocabQueue';
@@ -18,11 +18,12 @@ export default function NudgeCard({ deckId, preferences, navigate }) {
     }, [deckId]);
 
     // flashcardStartSide dependent on user preference
-    const startSide = useMemo(() => {
-        return flashcardStartSide === 'random'
+    const startSideRef = useRef(
+        flashcardStartSide === 'random'
             ? (Math.random() < 0.5 ? 'front' : 'back')
-            : flashcardStartSide;
-    }, [currentCard, flashcardStartSide]);
+            : flashcardStartSide
+    );
+    const startSide = startSideRef.current;
 
     if (!currentCard) return <p>Loading...</p>;
 
@@ -36,6 +37,9 @@ export default function NudgeCard({ deckId, preferences, navigate }) {
             } else {
                 const { card, listSize } = result;
                 const { next_review, streak } = nextReview(score, currentCard.review_time, currentCard.streak, 'nudge', listSize);
+                startSideRef.current = flashcardStartSide === 'random'
+                    ? (Math.random() < 0.5 ? 'front' : 'back')
+                    : flashcardStartSide;
                 setCurrentCard(card);
                 const { error } = supabase
                     .from('vocab')
@@ -50,7 +54,12 @@ export default function NudgeCard({ deckId, preferences, navigate }) {
         resetQueue(deckId);
         setDeckFinished(false);
         nextCard({ deckId }).then(result => {
-            if (result) setCurrentCard(result.card);
+            if (result) {
+                startSideRef.current = flashcardStartSide === 'random'
+                    ? (Math.random() < 0.5 ? 'front' : 'back')
+                    : flashcardStartSide;
+                setCurrentCard(result.card);
+            }
         });
     }
 
