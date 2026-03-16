@@ -14,8 +14,9 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting",
-    "identity"
+    "identity",
+    "alarms",
+    "notifications"
   ],
   "host_permissions": [
     "https://*.supabase.co/*"

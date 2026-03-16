@@ -48,12 +48,15 @@ export default function Vocabs({ deckId, navigate }) {
     useEffect(() => {
         fetchVocabs();
         fetchDeckName(deckId);
+    }, [deckId, fetchVocabs, fetchDeckName]);
+
+    useEffect(() => {
         const handleClickOutside = () => setActiveMenuId(null);
         document.addEventListener('click', handleClickOutside);
         return () => {
             document.removeEventListener('click', handleClickOutside);
         };
-    }, [deckId, fetchVocabs, fetchDeckName]);
+    }, []);
 
     // watch state and sync to local storage
     useEffect(() => {
@@ -173,7 +176,7 @@ export default function Vocabs({ deckId, navigate }) {
 
     const vocabsToDisplay = useMemo(() => {
         return sortVocabs(filteredVocabs, sortBy);
-    }, [vocabs, searchQuery, sortBy]);
+    }, [filteredVocabs, sortBy]);
     
     
     return (

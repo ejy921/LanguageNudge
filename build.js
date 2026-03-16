@@ -29,11 +29,17 @@ async function runBuild() {
         ...config,
         entryPoints: ['src/background.js'],
         outfile: 'dist/background.js',
+      }),
+      build({
+        ...config,
+        entryPoints: ['src/nudge.jsx'],
+        outfile: 'dist/nudge.js',
       })
     ]);
 
     copyFileSync('src/popup.html', 'dist/popup.html');
     copyFileSync('src/popup.css', 'dist/popup.css');
+    copyFileSync('src/nudge.html', 'dist/nudge.html');
     console.log('Build completed successfully.');
 
   } catch (error) {

@@ -18,11 +18,12 @@ export default function NudgeCard({ deckId, preferences, navigate }) {
     }, [deckId]);
 
     // flashcardStartSide dependent on user preference
-    const startSideRef = useRef(
-        flashcardStartSide === 'random'
+    const startSideRef = useRef(null);
+    if (startSideRef.current === null) {
+        startSideRef.current = flashcardStartSide === 'random'
             ? (Math.random() < 0.5 ? 'front' : 'back')
-            : flashcardStartSide
-    );
+            : flashcardStartSide;
+    }
     const startSide = startSideRef.current;
 
     if (!currentCard) return <p>Loading...</p>;
