@@ -37,6 +37,17 @@ vi.mock('../src/supabaseClient', () => {
   };
 });
 
+// Helper: returns an object that is both awaitable and has .single() for the decks query chain
+function eqResult(resolvedValue) {
+  const promise = Promise.resolve(resolvedValue);
+  return {
+    then: (onFulfilled, onRejected) => promise.then(onFulfilled, onRejected),
+    catch: (onRejected) => promise.catch(onRejected),
+    single: () => Promise.resolve({ data: { name: 'Test Deck' }, error: null }),
+    select: globalThis.__TEST_MOCKS__?.mockSelect,
+  };
+}
+
 describe('Vocabs Component', () => {
   const mockDeckId = 123;
   const mockNavigate = vi.fn();
@@ -77,11 +88,8 @@ describe('Vocabs Component', () => {
     // Handle the specific chain for update: .update().eq().select()
     // We need eq to return an object with select in this specific path
     mockEq.mockImplementation(() => ({
-       select: mockSelect, // For update().eq().select()
-       // If the chain ends at eq() (like fetch or delete), we usually just await this object
-       // But in your code, you await the chain. To make a mock awaitable, 
-       // we usually use mockResolvedValue on the *last* function. 
-       // We will set specific return values in the tests below.
+       select: mockSelect,
+       single: () => Promise.resolve({ data: { name: 'Test Deck' }, error: null }),
     }));
   });
 
@@ -89,7 +97,7 @@ describe('Vocabs Component', () => {
     const mockData = createMockVocabs(2);
 
     // Setup Mock: .from().select().eq() -> returns data
-    mockEq.mockResolvedValue({ data: mockData, error: null });
+    mockEq.mockReturnValue(eqResult({ data: mockData, error: null }));
 
     render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
 
@@ -109,7 +117,7 @@ describe('Vocabs Component', () => {
     const newCard = { id: 99, front: 'New Front', back: 'New Back', deck_id: mockDeckId };
 
     // 1. Mock Fetch (Initial load)
-    mockEq.mockResolvedValueOnce({ data: existingData, error: null });
+    mockEq.mockReturnValueOnce(eqResult({ data: existingData, error: null }));
     
     // 2. Mock Insert Chain: .insert().select()
     // Ensure the insert call returns a select() that resolves to the new card (avoid consuming mockSelect used for fetch)
@@ -150,11 +158,13 @@ describe('Vocabs Component', () => {
     const mockData = createMockVocabs(1); // One card: Front 1
     const updatedCard = { ...mockData[0], front: 'Edited Front' };
 
-    // 1. Mock Fetch
-    mockEq.mockResolvedValueOnce({ data: mockData, error: null });
+    // 1. Mock Fetch (vocab query eq)
+    mockEq.mockReturnValueOnce(eqResult({ data: mockData, error: null }));
 
-    // 2. Mock Update Chain: .update().eq().select()
-    // Here, eq().select() should resolve to the updated card without interfering with the initial fetch
+    // 2. Mock Fetch (decks query eq)
+    mockEq.mockReturnValueOnce(eqResult({ data: { name: 'Test Deck' }, error: null }));
+
+    // 3. Mock Update Chain: .update().eq().select()
     mockEq.mockReturnValueOnce({ select: () => Promise.resolve({ data: [updatedCard], error: null }) });
 
     const { container } = render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
@@ -222,8 +232,8 @@ describe('Vocabs Component', () => {
     // Call #1: Initial Fetch (Vocabs) -> Returns empty list
     // Call #2: Delete Deck (Deck) -> Returns success (error: null)
     mockEq
-      .mockResolvedValueOnce({ data: [], error: null }) 
-      .mockResolvedValueOnce({ error: null });          
+      .mockReturnValueOnce(eqResult({ data: [], error: null }))
+      .mockReturnValueOnce(eqResult({ error: null }));          
 
     // 2. Render
     const { container } = render(React.createElement(Vocabs, { deckId: mockDeckId, navigate: mockNavigate }));
